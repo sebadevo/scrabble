@@ -1,0 +1,26 @@
+[project]
+name = "scrabble"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".", 
+    "src",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.2",
+    "ty>=0.0.1a13",
+]
+
+test = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+]
