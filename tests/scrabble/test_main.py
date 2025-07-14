@@ -7,6 +7,9 @@ from src.scrabble.main import (
     init_pioche,
     init_plateau,
     load_fichier_lettres,
+    propose_mot,
+    verif_bornes,
+    verif_premier_tour,
 )
 
 
@@ -127,3 +130,49 @@ def test_get_mot(monkeypatch: MonkeyPatch):
     all_inputs = ["123", "hey1", mot]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
     assert mot.upper() == get_mot()
+
+
+def test_propose_mot(monkeypatch: MonkeyPatch):
+    all_inputs = ["5", "5", "H", "hello"]
+    monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
+    expected_output = ("HELLO", (5, 5), "H")
+    assert expected_output == propose_mot()
+
+
+def test_verif_bornes_passes_horizontally():
+    coup = ("BONJOUR", (7, 7), "H")
+    dimension = (15, 15)
+    assert verif_bornes(coup, dimension) is True
+
+
+def test_verif_bornes_passes_vertically():
+    coup = ("BONJOUR", (7, 7), "V")
+    dimension = (15, 15)
+    assert verif_bornes(coup, dimension) is True
+
+
+def test_verif_bornes_fails_vertically():
+    coup = ("BONJOUR", (10, 7), "V")
+    dimension = (15, 15)
+    assert verif_bornes(coup, dimension) is False
+
+
+def test_verif_bornes_fails_horizontally():
+    coup = ("BONJOUR", (7, 10), "H")
+    dimension = (15, 15)
+    assert verif_bornes(coup, dimension) is False
+
+
+def test_verif_premier_tour_vertically():
+    coup = ("BONJOUR", (7, 7), "V")
+    assert verif_premier_tour(coup) is True
+
+
+def test_verif_premier_tour_horizontally():
+    coup = ("BONJOUR", (7, 7), "H")
+    assert verif_premier_tour(coup) is True
+
+
+def test_verif_premier_tour_fails():
+    coup = ("BONJOUR", (5, 5), "H")
+    assert verif_premier_tour(coup) is False

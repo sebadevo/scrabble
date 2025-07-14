@@ -168,7 +168,7 @@ def verif_bornes(coup, dimensions):
         (nb_lignes); le deuxième élément est le nombre de colonnes (nb_colonnes)
 
     Returns :
-        - bool (True ou False)
+        - bool: Si le mot respect les bornes du plateau.
 
     Examples :
         coup = ("BONJOUR", (7,7), "V")
@@ -244,7 +244,7 @@ def jeton_joueur(pioche_jeu, main_joueur):
         >>> jeton_joueur(pioche_jeu, main_joueur)
         AKDHCEC AAAAABBBBBCCCDDDDDEEEE
     """
-    for i in range(7 - len(main_joueur)):
+    for _ in range(7 - len(main_joueur)):
         x = random.randint(0, len(pioche_jeu) - 1)
         main_joueur += pioche_jeu[x]
         pioche_jeu = pioche_jeu[:x] + pioche_jeu[x + 1 :]
