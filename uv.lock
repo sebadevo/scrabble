@@ -136,7 +136,7 @@ wheels = [
 [[package]]
 name = "scrabble"
 version = "0.2.0"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [

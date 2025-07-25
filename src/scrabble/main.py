@@ -233,7 +233,7 @@ def jeton_joueur(pioche_jeu, main_joueur):
         alphabétique.
         - Main_joueur (str) : une chaine de caractère contenant les lettre du chevalet du joueur
 
-    Valeur de retour:
+    Returns:
         - - pioche_jeu (str) : une chaine de caractère contenant toutes les lettres de la pioche mis à jour classées
         dans l'ordre alphabétique.
         - Main_joueur (str) : une chaine de caractère contenant les lettre du chevalet du joueur mis à jour
@@ -529,7 +529,7 @@ def compte_points(mots: list[str], points_lettres: dict[str, int]):
         - points_lettres (dict) : un dictionnaire contenant comme clés les différentes lettres de l'alphabet,
         en majuscule; et comme valeur, les points associées à chaque lettre.
 
-    Valeur de retour :
+    Returns :
         - int : points associés aux mots placés.
 
     Examples :
@@ -563,7 +563,7 @@ def placer_mot(coup, plateau):
         contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
         placée là auparavant.
 
-    Valeur de retour:
+    Returns:
         - str : chaine de caractères contenant les lettres déjà présentes sur le plateau à l'emplacement du mot
         (qu'il ne faut donc pas retirer du chevalet du joueur)
     Examples:
@@ -614,7 +614,7 @@ def retirer_chevalet(main, mot, lettre_en_trop):
         - lettre_en_trop (str) : une chaine de caractères en majuscule qui indique les lettres déjà présente sur le
         plateau, donc celle qui ne faudra pas retirer du chevalet du joueur.
 
-    Valeur de retour:
+    Returns:
         - main (str) : une chaine de caractères en majuscule représentant le chevalet du joueur mis à jour.
 
     Examples:
@@ -645,7 +645,7 @@ def mot_sur_plateau(coup, plateau):
         contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
         placée là auparavant.
 
-    Valeur de retour:
+    Returns:
         - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
         contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
         placée là auparavant.
@@ -710,7 +710,7 @@ def multijoueur():
     Args :
         /
 
-    Valeur de retour:
+    Returns:
         - lsit_joueur (list) : une list de sous-liste correspondant au nombre de joueur.
 
     Examples:
@@ -950,9 +950,9 @@ def localisation_lettre_sur_plateau(coup, plateau):
         contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
         placée là auparavant.
 
-    Valeur de retour:
+    Returns:
         position (list) : une liste de tuple correspondant aux positions des lettres déjà présentes sur le plateau à
-        l'emplacement du mot qui va être placé.
+            l'emplacement du mot qui va être placé.
 
     Examples:
     >>> coup = ("DES", (6,7), "V")
@@ -995,14 +995,14 @@ def fifty_points(mot, lettre_en_plus):
     Cette fonction renvoie un entier valant 50 si toutes les lettre du chevalet sont utilisées en un coup. Elle renvoie
     un entier valant 0 si ce n'est pas le cas.
 
-    Args :
+    Args:
         mot (str) : chaine de caractère correspondant au mot que le joueur à placé.
         lettre_en_plus (str) : chaine de caractère correspondant au lettre déjà présente sur le plateau à l'emplacement
         du mot que le joueur veux jouer.
 
-    Valeur de retour :
-        - points (int) : entier valant 50 si toutes les lettre du chevalet sont utilisées en un coup, 0 dans le cas
-        contraire
+    Returns:
+        points (int) : entier valant 50 si toutes les lettre du chevalet sont utilisées en un coup, 0 dans le cas
+            contraire
 
     Examples:
         >>> mot = "BONJOUR"
@@ -1027,7 +1027,7 @@ def main():
 
     Args:
         /
-    Valeur de retour:
+    Returns:
         /
     """
     list_joueur = multijoueur()
