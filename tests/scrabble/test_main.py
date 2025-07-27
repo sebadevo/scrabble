@@ -1,6 +1,6 @@
 from pytest import MonkeyPatch
 
-from src.scrabble.main import (
+from scrabble.main import (
     get_direction,
     get_mot,
     get_position,
