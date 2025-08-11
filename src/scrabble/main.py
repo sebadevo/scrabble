@@ -36,7 +36,7 @@ def load_fichier_lettres(
     return occurence_dict, points_dict
 
 
-def init_pioche(occurence_lettres: dict[str, int]):
+def init_pioche(occurence_lettres: dict[str, int]) -> str:
     """
     Cette fonction renvoie une chaine de caractères (str) contenant toutes les lettres disponibles lors de
     l'initialisation du jeu, classées dans l'ordre alphabétique.
@@ -527,7 +527,7 @@ def mot_accepte(
     return res
 
 
-def compte_points(mots: list[str], points_lettres: dict[str, int]):
+def compte_points(mots: list[str], points_lettres: dict[str, int]) -> int:
     """
     Cette fonction calcule et renvoie le score associé à un ou des mots
 
@@ -1037,7 +1037,7 @@ def fifty_points(mot: str, lettre_en_plus: str) -> int:
     return points
 
 
-def run():
+def run() -> None:
     """
     Cette fonction ne sert qu'à faire tourner tout le jeu
 
@@ -1092,8 +1092,3 @@ def run():
             list_joueur[i][1] = retirer_chevalet(list_joueur[i][1], mot, lettre_en_plus)
             plateau_de_jeu = mot_sur_plateau((mot, pos, direc), plateau_de_jeu)
             tour += 1
-
-
-# if __name__ == "__main__":
-#     # main()
-#     print("hello world")

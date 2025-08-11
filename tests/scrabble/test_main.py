@@ -13,7 +13,7 @@ from scrabble.main import (
 )
 
 
-def test_load_fichier_lettres():
+def test_load_fichier_lettres() -> None:
     file_name = "resources/Lettres.txt"
     expected_occurence = {
         "A": 9,
@@ -78,14 +78,14 @@ def test_load_fichier_lettres():
     assert expected_points == points
 
 
-def test_pioche_init():
+def test_pioche_init() -> None:
     occurence_lettres = {"E": 5, "A": 7}
     output = init_pioche(occurence_lettres)
     expected_output = "AAAAAAAEEEEE"
     assert output == expected_output
 
 
-def test_plateau_init():
+def test_plateau_init() -> None:
     lines, columns = 3, 4
     plateau = init_plateau((lines, columns))
     expected_plateu = [
@@ -96,14 +96,14 @@ def test_plateau_init():
     assert expected_plateu == plateau
 
 
-def test_get_position(monkeypatch: MonkeyPatch):
+def test_get_position(monkeypatch: MonkeyPatch) -> None:
     position = "5"
     all_inputs = ["dummy_Value", "-5", "30", position]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
     assert int(position) == get_position("dummy_value")
 
 
-def test_get_direction(monkeypatch: MonkeyPatch):
+def test_get_direction(monkeypatch: MonkeyPatch) -> None:
     direction = "V"
     all_inputs = ["Dummy_value", 5, "v"]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
@@ -125,54 +125,54 @@ def test_get_direction(monkeypatch: MonkeyPatch):
     assert direction == get_direction()
 
 
-def test_get_mot(monkeypatch: MonkeyPatch):
+def test_get_mot(monkeypatch: MonkeyPatch) -> None:
     mot = "hello"
     all_inputs = ["123", "hey1", mot]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
     assert mot.upper() == get_mot()
 
 
-def test_propose_mot(monkeypatch: MonkeyPatch):
+def test_propose_mot(monkeypatch: MonkeyPatch) -> None:
     all_inputs = ["5", "5", "H", "hello"]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
     expected_output = ("HELLO", (5, 5), "H")
     assert expected_output == propose_mot()
 
 
-def test_verif_bornes_passes_horizontally():
+def test_verif_bornes_passes_horizontally() -> None:
     coup = ("BONJOUR", (7, 7), "H")
     dimension = (15, 15)
     assert verif_bornes(coup, dimension) is True
 
 
-def test_verif_bornes_passes_vertically():
+def test_verif_bornes_passes_vertically() -> None:
     coup = ("BONJOUR", (7, 7), "V")
     dimension = (15, 15)
     assert verif_bornes(coup, dimension) is True
 
 
-def test_verif_bornes_fails_vertically():
+def test_verif_bornes_fails_vertically() -> None:
     coup = ("BONJOUR", (10, 7), "V")
     dimension = (15, 15)
     assert verif_bornes(coup, dimension) is False
 
 
-def test_verif_bornes_fails_horizontally():
+def test_verif_bornes_fails_horizontally() -> None:
     coup = ("BONJOUR", (7, 10), "H")
     dimension = (15, 15)
     assert verif_bornes(coup, dimension) is False
 
 
-def test_verif_premier_tour_vertically():
+def test_verif_premier_tour_vertically() -> None:
     coup = ("BONJOUR", (7, 7), "V")
     assert verif_premier_tour(coup) is True
 
 
-def test_verif_premier_tour_horizontally():
+def test_verif_premier_tour_horizontally() -> None:
     coup = ("BONJOUR", (7, 7), "H")
     assert verif_premier_tour(coup) is True
 
 
-def test_verif_premier_tour_fails():
+def test_verif_premier_tour_fails() -> None:
     coup = ("BONJOUR", (5, 5), "H")
     assert verif_premier_tour(coup) is False
