@@ -4,9 +4,9 @@ from scrabble.main import (
     get_direction,
     get_mot,
     get_position,
+    init_board,
     init_pioche,
-    init_plateau,
-    load_fichier_lettres,
+    load_occurrences_and_points,
     propose_mot,
     verif_bornes,
     verif_premier_tour,
@@ -72,7 +72,7 @@ def test_load_fichier_lettres() -> None:
         "Z": 10,
     }
 
-    occurence, points = load_fichier_lettres(file_name)
+    occurence, points = load_occurrences_and_points(file_name)
 
     assert expected_occurence == occurence
     assert expected_points == points
@@ -87,7 +87,7 @@ def test_pioche_init() -> None:
 
 def test_plateau_init() -> None:
     lines, columns = 3, 4
-    plateau = init_plateau((lines, columns))
+    plateau = init_board((lines, columns))
     expected_plateu = [
         ["_", "_", "_", "_"],
         ["_", "_", "_", "_"],

@@ -1,4 +1,4 @@
-class player:
+class Player:
     """
     The player class for the Scrabble game.
     """

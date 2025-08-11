@@ -1,8 +1,10 @@
 import random
 from copy import deepcopy
 
+from scrabble.player import Player
 
-def load_fichier_lettres(
+
+def load_occurrences_and_points(
     nom_fichier_lettres: str,
 ) -> tuple[dict[str, int], dict[str, int]]:
     """
@@ -60,7 +62,7 @@ def init_pioche(occurence_lettres: dict[str, int]) -> str:
     return sorted_characters
 
 
-def init_plateau(dimensions: tuple[int, int]) -> list[list[str]]:
+def init_board(dimensions: tuple[int, int]) -> list[list[str]]:
     """
     Crée le plateau de jeu. Le plateau de jeu consiste en une liste de number_of_lines sous-listes, chacune de longueur
     number_of_columns, où chaque élément représente une case du plateau vide grâce à la valeur "_"
@@ -224,7 +226,7 @@ def verif_premier_tour(coup: tuple[str, tuple[int, int], str]) -> bool:
     return res
 
 
-def jeton_joueur(pioche_jeu: str, main_joueur: str) -> tuple[str, str]:
+def draw_hand(pioche_jeu: str, main_joueur: str) -> tuple[str, str]:
     """
     Cette fonction choisit aléatoirement des lettre dans la pioche et les rajoute dans le chevalet du joueur jusqu'à ce
     qu'il ait 7 jetons. Elle renvoie ensuite le chevalet du joueur plein et la pioche avec les jetons en moins qui ont
@@ -709,7 +711,7 @@ def mot_sur_plateau(
     return plateau
 
 
-def multijoueur() -> list[list[str | int]]:
+def multijoueur() -> list[Player]:
     """
     Cette fonction renvoie une list de sous-liste chacune composé en indice:
         - 0 : le nom du joueur
@@ -734,17 +736,17 @@ def multijoueur() -> list[list[str | int]]:
     number_of_players = "-1"
     while not number_of_players.isdigit():
         number_of_players = input("Combien de joueur êtes vous? ")
-    number_of_players = int(number_of_players)
+    number_of_players_int = int(number_of_players)
 
-    list_joueur = [
-        [input(f"Quel est le nom du joueur n°{i + 1} ? "), "", 0]
-        for i in range(number_of_players)
+    list_of_players = [
+        Player(input(f"Quel est le nom du joueur n°{i + 1} ? "))
+        for i in range(number_of_players_int)
     ]
 
-    return list_joueur
+    return list_of_players
 
 
-def affichage_plateau(plateau: list[list[str]]) -> None:
+def display_board(plateau: list[list[str]]) -> None:
     """
     Cette fonction ne sert qu'à imprimer le plateau d'une manière plus esthétique. Elle ne renvoie rien.
 
@@ -1046,23 +1048,23 @@ def run() -> None:
     Returns:
         /
     """
-    list_joueur = multijoueur()
+    players = multijoueur()
     tour = 1
     dimensions = (15, 15)
-    plateau_de_jeu = init_plateau(dimensions)
-    dico_occu, dico_points = load_fichier_lettres("resources/Lettres.txt")
+    plateau_de_jeu = init_board(dimensions)
+    dico_occu, dico_points = load_occurrences_and_points("resources/Lettres.txt")
     dico_mot = list_dico("resources/dico.txt")
     pioche = init_pioche(dico_occu)
     while len(pioche) > 0:
-        for i in range(len(list_joueur)):
-            affichage_plateau(plateau_de_jeu)
-            pioche, list_joueur[i][1] = jeton_joueur(pioche, list_joueur[i][1])
-            print("C'est au tour de", list_joueur[i][0])
-            print("Vous avez dans votre main les jetons suivants:", list_joueur[i][1])
+        for player in players:
+            display_board(plateau_de_jeu)
+            pioche, player.hand = draw_hand(pioche, player.hand)
+            print("C'est au tour de", player.name)
+            print("Vous avez dans votre main les jetons suivants:", player.hand)
             mot, pos, direc = propose_mot()
             while not mot_accepte(
                 plateau_de_jeu,
-                list_joueur[i][1],
+                player.hand,
                 (mot, pos, direc),
                 dico_mot,
                 tour,
@@ -1071,24 +1073,17 @@ def run() -> None:
                 mot, pos, direc = propose_mot()
             lettre_en_plus = placer_mot((mot, pos, direc), plateau_de_jeu)
             pts_scrabble_fifty = fifty_points(mot, lettre_en_plus)
-            list_joueur[i][2] = (
-                list_joueur[i][2]
-                + compte_points(
-                    mots_perpendiculaires((mot, pos, direc), plateau_de_jeu, dico_mot),
-                    dico_points,
-                )
-                + pts_scrabble_fifty
+            pts_scrabble_this_round = compte_points(
+                mots_perpendiculaires((mot, pos, direc), plateau_de_jeu, dico_mot),
+                dico_points,
             )
+            player.score += pts_scrabble_this_round + pts_scrabble_fifty
             print(
                 "Tu viens de marquer",
-                compte_points(
-                    mots_perpendiculaires((mot, pos, direc), plateau_de_jeu, dico_mot),
-                    dico_points,
-                )
-                + pts_scrabble_fifty,
+                pts_scrabble_this_round + pts_scrabble_fifty,
                 "points.",
             )
-            print("Tu as au total", list_joueur[i][2], "points.")
-            list_joueur[i][1] = retirer_chevalet(list_joueur[i][1], mot, lettre_en_plus)
+            print("Tu as au total", player.score, "points.")
+            player.hand = retirer_chevalet(player.hand, mot, lettre_en_plus)
             plateau_de_jeu = mot_sur_plateau((mot, pos, direc), plateau_de_jeu)
             tour += 1
