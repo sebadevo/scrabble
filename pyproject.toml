@@ -19,7 +19,7 @@ dev = [
     { include-group = "test" },
 ]
 
-test = ["pytest>=8.4.2", "pytest-cov>=7.0.0"]
+test = ["pytest>=9.0.2", "pytest-cov>=7.0.0"]
 
 [project.scripts]
 scrabble = "scrabble:main"
