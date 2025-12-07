@@ -3,9 +3,7 @@ name = "scrabble"
 version = "0.1.0"
 description = "Scrabble game in python stdout in BA1 from EPB at ULB"
 readme = "README.md"
-authors = [
-    { name = "Sébastien De Vos", email = "sebastien.devos@euranova.eu" }
-]
+authors = [{ name = "Sébastien De Vos", email = "sebastien.devos@euranova.eu" }]
 requires-python = "~=3.13.0"
 dependencies = []
 
@@ -15,29 +13,17 @@ project-excludes = ["**/*venv/**/*"]
 
 [dependency-groups]
 dev = [
-    "pyrefly>=0.28.0",
-    "ruff>=0.12.8",
-    "ty>=0.0.1a17",
+    "pyrefly>=0.44.2",
+    "ruff>=0.14.8",
+    "ty>=0.0.1a32",
+    { include-group = "test" },
 ]
 
-test = [
-    "pytest>=8.4.1",
-    "pytest-cov>=6.2.1",
-]
+test = ["pytest>=8.4.2", "pytest-cov>=7.0.0"]
 
 [project.scripts]
 scrabble = "scrabble:main"
 
 [build-system]
-requires = ["uv_build>=0.8.8,<0.9.0"]
+requires = ["uv_build>=0.9.0,<0.10.0"]
 build-backend = "uv_build"
-
-
-[tool.pytest.ini_options]
-pythonpath = [
-    ".", 
-    "src",
-]
-
-[tool.uv.sources]
-scrabble = { workspace = true }

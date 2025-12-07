@@ -1,6 +1,5 @@
 class Player:
-    """
-    The player class for the Scrabble game.
+    """The player class for the Scrabble game.
     """
 
     name: str
