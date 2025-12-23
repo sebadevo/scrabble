@@ -25,6 +25,7 @@ def load_occurrences_and_points(
         # If the file "letters.txt" contains the line "A 15 1":
         >>> load_occurrences_and_points("letters.txt")
         ({"A": 15}, {"A": 1})
+
     """
     occurrence_dict: dict[str, int] = {}
     points_dict: dict[str, int] = {}
@@ -53,6 +54,7 @@ def initialise_tile_bag(letter_occurrences: dict[str, int]) -> str:
         >>> letter_occurrences = {'E':5, 'A':7}
         >>> initialise_tile_bag(letter_occurrences)
         'AAAAAAAEEEEE'
+
     """
     sorted_characters = "".join(
         sorted(lettre * letter_occurrences[lettre] for lettre in letter_occurrences),
@@ -76,6 +78,7 @@ def initialise_board(dimensions: tuple[int, int]) -> list[list[str]]:
     Example:
         >>> initialise_board((3, 4))
         [["_", "_", "_", "_"], ["_", "_", "_", "_"], ["_", "_", "_", "_"]]
+
     """
     number_of_lines, number_of_columns = dimensions
     board = [["_" for _ in range(number_of_columns)] for _ in range(number_of_lines)]
@@ -97,6 +100,7 @@ def ask_word() -> tuple[str, tuple[int, int], str]:
         Dans quelle direction voulez-vous placer votre mot? (h ou v) h
         Quelle mot voulez-vous placer? Bonjour
         ('BONJOUR', (5, 6), 'H')
+
     """
     position_ligne = get_position("ligne")
     position_colonne = get_position("colonne")
@@ -113,6 +117,7 @@ def get_word() -> str:
 
     Returns:
         The proposed word in uppercase.
+
     """
     word = "-1"
     while not word.isalpha():
@@ -126,6 +131,7 @@ def get_direction() -> str:
 
     Returns:
         The direction chosen by the player ('H' or 'V').
+
     """
     direction = "-1"
     while direction not in {"V", "H", "v", "h"}:
@@ -139,6 +145,7 @@ def get_position(axe: str) -> int:
 
     Args:
         axe (str): The axis name to show in the prompt ('ligne' or 'colonne').
+
     """
     position = "-1"
     while not position.isdigit() or not 0 <= int(position) <= 14:
@@ -160,6 +167,7 @@ def verify_board_boundaries(
                 of the word to place.
             direction: a character (h or v) indicating the direction of the word.
         dimensions: (number_of_lines, number_of_columns)
+
     """
     word, position, direction = move
     line, column = position
@@ -188,6 +196,7 @@ def verify_first_word_centered(move: tuple[str, tuple[int, int], str]) -> bool:
 
     Returns:
         True if the word passes through the center square; False otherwise.
+
     """
     word, position, direction = move
     line, column = position
@@ -214,6 +223,7 @@ def draw_hand(tile_bag: str, player_hand: str) -> tuple[str, str]:
     Example:
         >>> draw_hand("AAAAABBBBBCCCCCDDDDDEEEEE", "AKDH")
         ("AAAAABBBBBCCCDDDDDEEEE", "AKDHCEC")  # example result (random)
+
     """
     for _ in range(7 - len(player_hand)):
         x = random.randint(0, len(tile_bag) - 1)
@@ -246,6 +256,7 @@ def verify_player_hand_against_move(
     Returns:
         bool: True if the player can form the word using rack letters combined
             with letters on the board; False otherwise.
+
     """
     word, position, direction = move
     line, column = position
@@ -277,6 +288,7 @@ def get_dictionary_set(dictionary_file_name: str) -> set[str]:
 
     Returns:
         set[str]: Set of words loaded from the file.
+
     """
     dictionary = set()
     for m in open(dictionary_file_name, encoding="utf-8"):
@@ -291,6 +303,7 @@ def verify_word(word: str, set_of_valid_words: set[str]) -> bool:
     Args:
         word: Word to check (uppercase).
         set_of_valid_words: Set of valid words.
+
     """
     return word in set_of_valid_words
 
@@ -313,6 +326,7 @@ def verify_word_placement(
             direction: a character (h or v) indicating the direction of the word.
         board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
             indicate an empty cell, or a letter if it has already been placed there.
+
     """
     word, position, direction = move
     line, column = position
@@ -478,6 +492,7 @@ def compute_score(word: list[str], letter_point_mapping: dict[str, int]) -> int:
 
     Returns:
         int: Total points for all provided words.
+
     """
     points = 0
     for i in range(len(word)):
@@ -543,7 +558,9 @@ def place_word(move: tuple[str, tuple[int, int], str], board: list[list[str]]) -
 
 
 def remove_used_letters_from_player_hand(
-    player_hand: str, word: str, extra_letters: str
+    player_hand: str,
+    word: str,
+    extra_letters: str,
 ) -> str:
     """Remove the letters used to form the played word from the player's rack.
 
@@ -773,8 +790,10 @@ def get_perpendicular_words(
     board: list[list[str]],
     set_of_valid_words: set[str],
 ) -> list[str]:
-    """When placing a word on the board, it is possible that it is adjacent to letters already present on
-    the board. New words perpendicular to the word being placed are then formed.
+    """Return a list of new words formed perpendicular to the placed word.
+
+    When placing a word on the board, it is possible that it is adjacent to letters already present on the board.
+    New words perpendicular to the word being placed are then formed.
     3 cases are possible:
         - If no perpendicular words are formed, this function returns a list containing one element: the word to be
             placed.
@@ -998,7 +1017,9 @@ def run() -> None:
             )
             print("Tu as au total", player.score, "points.")
             player.hand = remove_used_letters_from_player_hand(
-                player.hand, mot, lettre_en_plus
+                player.hand,
+                mot,
+                lettre_en_plus,
             )
             plateau_de_jeu = update_board_with_move((mot, pos, direc), plateau_de_jeu)
             tour += 1
