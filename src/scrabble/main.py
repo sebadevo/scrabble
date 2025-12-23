@@ -7,133 +7,125 @@ from scrabble.player import Player
 def load_occurrences_and_points(
     nom_fichier_lettres: str,
 ) -> tuple[dict[str, int], dict[str, int]]:
-    """Cette fonction ouvre et lit un fichier texte dont le nom est fourni en argument. Ce fichier contient 26 lignes
-    (une pour chaque lettre de l'alphabet). Chaque ligne est composée d'une lettre, d'un nombre d'occurrences de cette
-    lettre dans le jeu et des points que la lettre rapporte au joueur s'il la place, chacun séparé par un espace. Elle
-    renvoie ensuite deux dictionnaires dont les clés sont les lettres contenues dans le fichier texte et les valeurs
-    sont respectivement le nombre d'occurrences et les points que la lettre rapporte.
+    """Open and read a letter definition file and return occurrences and points.
+
+    The file should contain one line per letter. Each line holds a letter, the number
+    of occurrences of that letter in the game, and the points awarded for that
+    letter, separated by whitespace. Returns two dictionaries mapping letters to
+    occurrences and letters to point values respectively.
 
     Args:
-        nom_fichier_lettres (str): Un chaine de caractère qui représente le nom du fichier texte à ouvrir.
+        nom_fichier_lettres (str): Path to the letters file to open.
 
     Returns:
-        occurence_dict (dict[str, int]): Un dictionnaire avec comme clés les lettres contenues dans le fichier et comme valeur le nombre
-            d'occurrences de cette lettre.
-        points_dict (dict[str, int]): Un dictionnaire avec comme clés les lettres contenues dans le fichier et comme valeur les points
-            associés à chaque lettre.
+        occurrence_dict (dict[str, int]): Mapping from letter to its occurrence count.
+        points_dict (dict[str, int]): Mapping from letter to its point value.
 
-    Examples:
-        Imaginons ici que le texte à ouvrir aie "A 15 1" d'écrit et que le nom du fichier s'appelle "texte".
-        >>> load_fichier_lettres(texte)
-        {"A": 15} {"A": 1}
-
+    Example:
+        # If the file "letters.txt" contains the line "A 15 1":
+        >>> load_occurrences_and_points("letters.txt")
+        ({"A": 15}, {"A": 1})
     """
-    occurence_dict: dict[str, int] = {}
+    occurrence_dict: dict[str, int] = {}
     points_dict: dict[str, int] = {}
     for line in open(nom_fichier_lettres, encoding="utf-8"):
-        lettre, occurence, points = line.split()
-        occurence_dict[lettre] = int(occurence)
+        lettre, occurrence, points = line.split()
+        occurrence_dict[lettre] = int(occurrence)
         points_dict[lettre] = int(points)
 
-    return occurence_dict, points_dict
+    return occurrence_dict, points_dict
 
 
-def init_pioche(occurence_lettres: dict[str, int]) -> str:
-    """Cette fonction renvoie une chaine de caractères (str) contenant toutes les lettres disponibles lors de
-    l'initialisation du jeu, classées dans l'ordre alphabétique.
+def initialise_tile_bag(letter_occurrences: dict[str, int]) -> str:
+    """Return the initial tile bag as a sorted string of letters.
+
+    Builds a string containing each letter repeated according to its occurrence
+    count and returns the letters sorted alphabetically.
 
     Args:
-        occurences_lettres (dict[str, int]): dictionnaire ayant comme clés toutes les lettres de l'alphabet et comme valeur, le
-            nombre de fois (int) que chaque lettre devra être ajoutée à la pioche
+        letter_occurrences (dict[str, int]): Mapping from letter to number of
+            occurrences to include in the initial bag.
 
     Returns:
-        sorted_characters (str): une chaine de caractère contenant toutes les lettres de la pioche classées dans l'ordre alphabétique.
+        sorted_characters (str): String with all letters for the bag, sorted.
 
-    Examples:
-        >>> occurence_lettres = {'E':5, 'A':7}
-        >>> pioche_init(occurence_lettres)
-        AAAAAAAEEEEE
-
+    Example:
+        >>> letter_occurrences = {'E':5, 'A':7}
+        >>> initialise_tile_bag(letter_occurrences)
+        'AAAAAAAEEEEE'
     """
     sorted_characters = "".join(
-        sorted(lettre * occurence_lettres[lettre] for lettre in occurence_lettres),
+        sorted(lettre * letter_occurrences[lettre] for lettre in letter_occurrences),
     )
 
     return sorted_characters
 
 
-def init_board(dimensions: tuple[int, int]) -> list[list[str]]:
-    """Crée le plateau de jeu. Le plateau de jeu consiste en une liste de number_of_lines sous-listes, chacune de longueur
-    number_of_columns, où chaque élément représente une case du plateau vide grâce à la valeur "_"
-    (underscore).
+def initialise_board(dimensions: tuple[int, int]) -> list[list[str]]:
+    """Create and return an empty game board of given dimensions.
+
+    The board is represented as a list of rows, each a list of strings. Empty
+    squares are filled with the underscore character "_".
 
     Args:
-        dimensions (tuple[int, int]): un tuple de deux nombres entiers et positifs, respectivement le nombre de lignes
-            et de colonnes.
+        dimensions: Tuple of (number_of_lines, number_of_columns).
 
     Returns:
-        plateau (list[list[str]]): la liste de sous-listes qui représente le plateau
+        board: The initialized board.
 
-    Examples:
-        >>> a = (3,4)
-        >>> plateau_init(a)
+    Example:
+        >>> initialise_board((3, 4))
         [["_", "_", "_", "_"], ["_", "_", "_", "_"], ["_", "_", "_", "_"]]
-
     """
     number_of_lines, number_of_columns = dimensions
-    plateau: list[list[str]] = [
-        ["_" for _ in range(number_of_columns)] for _ in range(number_of_lines)
-    ]
-
-    return plateau
+    board = [["_" for _ in range(number_of_columns)] for _ in range(number_of_lines)]
+    return board
 
 
-def propose_mot() -> tuple[str, tuple[int, int], str]:
-    """Cette fonction demande au joueur où et quel mot il désire placer.
+def ask_word() -> tuple[str, tuple[int, int], str]:
+    """Ask the player for where and what word they want to place.
 
     Returns:
-        mot (str): Une chaine de caractère en MAJUSCULE qui indique le mot à placer.
-        position (tuple[int, int]): Un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la
-            colonne (c) de la première lettre du mot à placer.
-        direction (str): Un charactère ("H" ou "V") qui indique la direction du mot.
+        mot (str): Uppercase word to place.
+        position (tuple[int, int]): (row, column) index for the first letter.
+        direction (str): 'H' for horizontal or 'V' for vertical.
 
-    Examples:
-        >>> propose_mot()
-        Sur quelle ligne voulez-vous placer votre première lettre? 5
-        Sur quelle colonne voulez-vous placer votre première lettre? 6
+    Example (interactive):
+        >>> ask_word()
+        Sure quelle ligne voulez-vous placer votre première lettre? 5
+        Sure quelle colonne voulez-vous placer votre première lettre? 6
         Dans quelle direction voulez-vous placer votre mot? (h ou v) h
         Quelle mot voulez-vous placer? Bonjour
         ('BONJOUR', (5, 6), 'H')
-
     """
     position_ligne = get_position("ligne")
     position_colonne = get_position("colonne")
     direction = get_direction()
-    mot = get_mot()
+    mot = get_word()
     position = (position_ligne, position_colonne)
     return mot, position, direction
 
 
-def get_mot() -> str:
-    """Récupère le mot que le joueur veut jouer.
+def get_word() -> str:
+    """Retrieve the word the player wants to play and return it in uppercase.
+
+    Keeps prompting until an alphabetic word is provided.
 
     Returns:
-        str: Le mot du joueur en majuscule.
-
+        The proposed word in uppercase.
     """
-    mot = "-1"
-    while not mot.isalpha():
-        mot = input("Quel mot proposez vous? ")
+    word = "-1"
+    while not word.isalpha():
+        word = input("Quel mot proposez vous? ")
 
-    return mot.upper()
+    return word.upper()
 
 
 def get_direction() -> str:
-    """Récupère la direction dansa laquelle le joueur veut placer son mot.
+    """Prompt the player for a direction and return 'H' or 'V'.
 
     Returns:
-        str: La direction, soit 'H', soit 'V'.
-
+        The direction chosen by the player ('H' or 'V').
     """
     direction = "-1"
     while direction not in {"V", "H", "v", "h"}:
@@ -143,14 +135,10 @@ def get_direction() -> str:
 
 
 def get_position(axe: str) -> int:
-    """Récupère la position ou le jouer veut placer son mot.
+    """Prompt for a row or column index (0-14) and return it as int.
 
     Args:
-        axe (str): L'axe sur lequel on va demander la position.
-
-    Returns:
-        int: La position.
-
+        axe (str): The axis name to show in the prompt ('ligne' or 'colonne').
     """
     position = "-1"
     while not position.isdigit() or not 0 <= int(position) <= 14:
@@ -159,32 +147,21 @@ def get_position(axe: str) -> int:
     return int(position)
 
 
-def verif_bornes(
-    coup: tuple[str, tuple[int, int], str],
+def verify_board_boundaries(
+    move: tuple[str, tuple[int, int], str],
     dimensions: tuple[int, int],
 ) -> bool:
-    """Cette fonction renvoie True si le mot à placer ne dépasse pas les des bornes du plateau de jeu. False, sinon.
+    """Return True if the word fits within the board boundaries, else False.
 
     Args:
-        - coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-            (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
-        - dimensions (tuple): un tuple de deux nombres entiers et positifs. Le premier élément est le nombre de lignes
-        (nb_lignes); le deuxième élément est le nombre de colonnes (nb_colonnes)
-
-    Returns:
-        - bool: Si le mot respect les bornes du plateau.
-
-    Examples:
-        coup = ("BONJOUR", (7,7), "V")
-        dimension = (15,15)
-        >>> verif_bornes(coups,dimensions):
-        True
-
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        dimensions: (number_of_lines, number_of_columns)
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     lines, columns = dimensions
     word_length = len(word)
@@ -197,28 +174,22 @@ def verif_bornes(
     return res
 
 
-def verif_premier_tour(coup: tuple[str, tuple[int, int], str]) -> bool:
-    """Cette fonction retourne True si le mot à placer passe bien par la case (7,7).On considère que le mot à placer ne
-    dépasse pas des bornes du plateau et ne fait pas plus de 7 lettres. On considère également que cette fonction ne
-    sera appelée qu'au premier tour. Le plateau est donc totalement vide.
+def verify_first_word_centered(move: tuple[str, tuple[int, int], str]) -> bool:
+    """Return True if the first move passes through the center square (7,7).
+
+    Assumes the board is empty and the word fits on the board.
 
     Args:
-        coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l),et le numéro de la colonne (c)
-                de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word
 
     Returns:
-        True if the first round move is valid, else False.
-
-    Examples:
-        coup = ("BONJOUR", (7,5), "V")
-        >>> verif_premeier_tour(coup)
-        True
-
+        True if the word passes through the center square; False otherwise.
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     word_length = len(word)
     if (column == 7 and line <= 7 and direction == "V" and line + word_length >= 7) or (
@@ -230,75 +201,61 @@ def verif_premier_tour(coup: tuple[str, tuple[int, int], str]) -> bool:
     return res
 
 
-def draw_hand(pioche_jeu: str, main_joueur: str) -> tuple[str, str]:
-    """Cette fonction choisit aléatoirement des lettre dans la pioche et les rajoute dans le chevalet du joueur jusqu'à ce
-    qu'il ait 7 jetons. Elle renvoie ensuite le chevalet du joueur plein et la pioche avec les jetons en moins qui ont
-    été ajouter au chevalet du joueur.
+def draw_hand(tile_bag: str, player_hand: str) -> tuple[str, str]:
+    """Randomly draw tiles from the bag to fill the player's rack to 7 tiles.
 
     Args:
-        pioche_jeu (str): une chaine de caractère contenant toutes les lettres de la pioche classées dans l'ordre
-            alphabétique.
-        Main_joueur (str): une chaine de caractère contenant les lettre du chevalet du joueur
+        tile_bag (str): String representing the bag letters, sorted alphabetically.
+        player_hand (str): String representing the player's current rack letters.
 
     Returns:
-        pioche_jeu (str): une chaine de caractère contenant toutes les lettres de la pioche mis à jour classées
-            dans l'ordre alphabétique.
-        Main_joueur (str): une chaine de caractère contenant les lettre du chevalet du joueur mis à jour
+        (tile_bag, player_hand): Updated bag string and updated player rack.
 
-    Examples:
-        >>> main_joueur = "AKDH"
-        >>> pioche_jeu = "AAAAABBBBBCCCCCDDDDDEEEEE"
-        >>> jeton_joueur(pioche_jeu, main_joueur)
-        AAAAABBBBBCCCDDDDDEEEE AKDHCEC
-
+    Example:
+        >>> draw_hand("AAAAABBBBBCCCCCDDDDDEEEEE", "AKDH")
+        ("AAAAABBBBBCCCDDDDDEEEE", "AKDHCEC")  # example result (random)
     """
-    for _ in range(7 - len(main_joueur)):
-        x = random.randint(0, len(pioche_jeu) - 1)
-        main_joueur += pioche_jeu[x]
-        pioche_jeu = pioche_jeu[:x] + pioche_jeu[x + 1 :]
-    return pioche_jeu, main_joueur
+    for _ in range(7 - len(player_hand)):
+        x = random.randint(0, len(tile_bag) - 1)
+        player_hand += tile_bag[x]
+        tile_bag = tile_bag[:x] + tile_bag[x + 1 :]
+    return tile_bag, player_hand
 
 
-def verif_lettre_joueur(
-    plateau: list[list[str]],
-    lettres_joueur: str,
-    coup: tuple[str, tuple[int, int], str],
+def verify_player_hand_against_move(
+    board: list[list[str]],
+    player_hand: str,
+    move: tuple[str, tuple[int, int], str],
 ) -> bool:
-    """Cette fonction renvoie True:
-        - Si le mot à placer appartient au lettres du joueur (lettres_joueurs)
-        - Si une ou plusieurs lettres manquent mais sont déjà placées à la place adéquate sur le plateau (plateau).
-    Sinon, la fonction renvoie False.
-    On présuppose que le mot ne dépasse pas des bornes du plateau
+    """Return True if the player has the letters needed for the word.
+
+    This also returns True if some letters are missing from the player's rack but
+    are already present on the board at the correct positions. Assumes the word
+    fits within board bounds.
 
     Args:
-        plateau (list[list[str]]): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu.
-            Elles contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a
-            déjà été placée là auparavant.
-        lettres_joueur (str): une liste qui contient chacune des lettres que le joueur possède sur son chevalet.
-            Toutes ces lettres sont en MAJUSCULE.
-        coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-                (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
+        player_hand: String of player's rack letters (uppercase).
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
 
     Returns:
-        - bool (True ou False)
-
-    Examples:
-        >>> verif_lettre_joueur([["","",""],["","",""],["","","_"]], PRMNUOT, ("MON", (1,0), "H"))
-        True
-
+        bool: True if the player can form the word using rack letters combined
+            with letters on the board; False otherwise.
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
-    x = lettres_joueur
+    x = player_hand
     if direction == "V":
         for i in range(len(word)):
-            x += plateau[line + i][column]
+            x += board[line + i][column]
     elif direction == "H":
         for i in range(len(word)):
-            x += plateau[line][column + i]
+            x += board[line][column + i]
     x = x.replace("_", "")
     x = "".join(sorted(x))
     word = "".join(sorted(word))
@@ -310,127 +267,103 @@ def verif_lettre_joueur(
     return j == len(word)
 
 
-def list_dico(nom_fichier_dictionnaire: str) -> set[str]:
-    """Cette fonction ouvre un fichier contenant tous les mots du scrabble triés par ordre alphabétique et les ajoute a
-    un set.
+def get_dictionary_set(dictionary_file_name: str) -> set[str]:
+    """Load dictionary words from a file and return them as a set.
+
+    The file should contain one word per line.
 
     Args:
-        nom_fichier_dictionnaire (str): un fichier .txt contenant tous les mots du scrabble triés par ordre alphabétique
+        dictionary_file_name (str): Path to the dictionary text file.
 
     Returns:
-        dictionary (set): un set contenant tout les mots du dictionnaire.
-
-    Examples:
-    disons ici que le fichier contient les mots "BONJOUR", "AA", "MON" et "MES".
-        >>> list_dico(nom_fichier_dictionnaire)
-        {"BONJOUR", "AA", "MON" et "MES"}
-
+        set[str]: Set of words loaded from the file.
     """
     dictionary = set()
-    for m in open(nom_fichier_dictionnaire, encoding="utf-8"):
+    for m in open(dictionary_file_name, encoding="utf-8"):
         t = m.strip()
         dictionary.add(t)
     return dictionary
 
 
-def verif_mot(mot: str, dico: set[str]) -> bool:
-    """Cette fonction renvoie True si le mot à placer est bien un mot du dictionnaire. False sinon.
+def verify_word(word: str, set_of_valid_words: set[str]) -> bool:
+    """Return True if the given word is present in the dictionary set.
 
     Args:
-        - mot (str): une chaine de caractères en majuscule qui indique le mot à placer
-        - dico (set[str]): un set contenant tout les mots du dictionnaire accpeté au Scrabble.
-
-    Returns:
-        - bool (True ou False)
-
-    Examples:
-        >>> verif_mot("DES", {'K', 'C', 'A', 'SI', 'DE', 'SES', 'MIS', 'DES'})
-        True
-
+        word: Word to check (uppercase).
+        set_of_valid_words: Set of valid words.
     """
-    return mot in dico
+    return word in set_of_valid_words
 
 
-def verif_emplacement(
-    coup: tuple[str, tuple[int, int], str],
-    plateau: list[list[str]],
+def verify_word_placement(
+    move: tuple[str, tuple[int, int], str],
+    board: list[list[str]],
 ) -> bool:
-    """Cette fonction renvoie True si le mot à placer n'entre pas en conflit avec d'autres lettres déjà placées
-    auparavant sur le plateau, qui ne correspondent pas aux lettres du mot. Sinon, la fonction renvoie False.
-    On présuppose que le mot ne dépasse pas des bornes du plateau.
+    """Return True if placing the word doesn't conflict with existing letters on board.
+
+    The function checks that any existing letter on the board at the placement
+    positions matches the corresponding letter in the word. Assumes word fits in
+    board bounds.
 
     Args:
-        - coup (tuple[str, tuple[int, int], str]): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-                (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
-
-    Returns:
-        validity (bool): Si l'emplacement n'entre pas en conflit avec d'autres mot déjà présent sur le plateau.
-
-    Examples:
-        >>> verif_emplacement((MON, (2,0), "H"), [["_","_","_"],["_","_","_"],["_","_","_"]])
-        True
-
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     new_word = ""
     x = 0
     if direction == "H":
         for i in range(len(word)):
-            new_word += plateau[line][column + i]
+            new_word += board[line][column + i]
     elif direction == "V":
         for i in range(len(word)):
-            new_word += plateau[line + i][column]
+            new_word += board[line + i][column]
     for z in range(len(new_word)):
         if new_word[z] == "_" or new_word[z] == word[z]:
             x += 1
     return x == len(word)
 
 
-def mot_accepte(
-    plateau: list[list[str]],
-    lettres_joueur: str,
-    coup: tuple[str, tuple[int, int], str],
-    dictionnaire: set[str],
-    tour: int,
+def check_word_accepted(
+    board: list[list[str]],
+    player_hand: str,
+    move: tuple[str, tuple[int, int], str],
+    set_of_valid_words: set[str],
+    turn: int,
     dimension: tuple[int, int],
 ) -> bool:
-    """Cette fonction renvoie True si chacune des fonctions suivantes renvoient True:
-        - verif_premier_tour (uniquement au premier tour)
-        - verif_lettres_joueur
-        - verif_mot
-        - verif_bornes
-        - verif_emplacement
-        et en fonction de ce que renvoie la fonction mot_perpendiculaire, on test ou pas la fonction
-        utilise_lettre_plateau qui est également un bool.
-    Sinon, la fonction renvoie False.
+    """Return True if the proposed move is acceptable according to game rules.
+
+    The function validates a combination of checks depending on whether this is
+    the first turn or later turns. It uses the helper functions that test bounds,
+    dictionary membership, rack letters, placement conflicts, and perpendicular
+    words.
 
     Args:
-        - lettres_joueur (liste): une liste contenant les lettres du joueur
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
-        - coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-            (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
-        - tour (int): un entier qui représente le tour du jeu (tour = 1 représente le premier tour)
-        - dictionnaire (list): une liste dont chaque élément d'indice i, est un set de mots du dictionnaire de longueur
-         (i+1). Par exemple, dico[3] pointe vers un set de tous les mots à 4 lettres.
-        - dimension (tuple): un tuple d'entiers (nb_l, nb_c) qui indique le nombre de ligne et de colonne du plateau.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
+        player_hand: Player's rack letters.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        set_of_valid_words: Set of valid words.
+        turn: Current turn number (1 means first turn).
+        dimension: Board dimensions.
 
     Returns:
-        - bool (True ou False)
+        bool: True if move is valid and accepted; False otherwise. Prints messages
+            explaining the rejection reason(s).
 
-    Examples:
-        >>> plateau = [
+    Example:
+        >>> board = [
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
@@ -447,27 +380,27 @@ def mot_accepte(
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
         ]
-        >>> dictionnaire = [{'K', 'C', 'A'}, {'SI', 'DE'}, {'SES', 'MIS', 'DES'}]
-        >>> lettres_joueur = "PRDSUET"
-        >>> coup = ("DES", (7,7), "H")
-        >>> tour = 1
+        >>> set_of_valid_words = [{'K', 'C', 'A'}, {'SI', 'DE'}, {'SES', 'DES'}]
+        >>> player_hand = "PRDSUET"
+        >>> move = ("DES", (7,7), "H")
+        >>> turn = 1
         >>> dimension = (15,15)
-        >>> mot_accepte(plateau, lettres_joueur, coup, dictionnaire, tour, dimension)
+        >>> check_word_accepted(board, player_hand, move, set_of_valid_words, turn, dimension)
         True
 
     """
-    word, position, direction = coup
-    in_bounds = verif_bornes((word, position, direction), dimension)
+    word, position, direction = move
+    in_bounds = verify_board_boundaries((word, position, direction), dimension)
     res = True
-    if in_bounds and tour == 1:
-        ve_prem = verif_premier_tour((word, position, direction))
-        ve_lettre = verif_lettre_joueur(
-            plateau,
-            lettres_joueur,
+    if in_bounds and turn == 1:
+        ve_prem = verify_first_word_centered((word, position, direction))
+        ve_lettre = verify_player_hand_against_move(
+            board,
+            player_hand,
             (word, position, direction),
         )
-        ve_mot = verif_mot(word, dictionnaire)
-        ve_emp = verif_emplacement((word, position, direction), plateau)
+        ve_mot = verify_word(word, set_of_valid_words)
+        ve_emp = verify_word_placement((word, position, direction), board)
         if not ve_prem or not ve_lettre or not ve_mot or not ve_emp:
             if not ve_lettre:
                 print(
@@ -477,7 +410,7 @@ def mot_accepte(
                 print("Désolé mais ce mot n'existe pas. Veuillez réessayer.")
             if not ve_emp:
                 print(
-                    "Désolé mais votre mot entre en conflit avec des lettre du plateau. Veuillez réessayer.",
+                    "Désolé mais votre mot entre en conflict avec des lettre du plateau. Veuillez réessayer.",
                 )
             if not ve_prem:
                 print(
@@ -485,15 +418,15 @@ def mot_accepte(
                 )
             res = False
     elif in_bounds:
-        ve_lettre = verif_lettre_joueur(
-            plateau,
-            lettres_joueur,
+        ve_lettre = verify_player_hand_against_move(
+            board,
+            player_hand,
             (word, position, direction),
         )
-        ve_mot = verif_mot(word, dictionnaire)
-        ve_emp = verif_emplacement((word, position, direction), plateau)
-        len_perp = len(mots_perpendiculaires(coup, plateau, dictionnaire))
-        ut_plateau = utilise_lettre_plateau(coup, plateau)
+        ve_mot = verify_word(word, set_of_valid_words)
+        ve_emp = verify_word_placement((word, position, direction), board)
+        len_perp = len(get_perpendicular_words(move, board, set_of_valid_words))
+        ut_plateau = use_board_letters(move, board)
         if len_perp == 1:
             if not ve_lettre or not ve_mot or not ve_emp or not ut_plateau:
                 if not ve_lettre:
@@ -504,11 +437,11 @@ def mot_accepte(
                     print("Désolé mais ce mot n'existe pas. Veuillez réessayer.")
                 if not ve_emp:
                     print(
-                        "Désolé mais votre mot entre en conflit avec des lettre du plateau. Veuillez réessayer.",
+                        "Désolé mais votre mot entre en conflict avec des lettre du plateau. Veuillez réessayer.",
                     )
                 if not ut_plateau:
                     print(
-                        "Désolé mais votre mot ne se base sur aucun autre mot du plateau. Veuillez réessayer.",
+                        "Désolé mais votre mot ne se base sure aucun autre mot du plateau. Veuillez réessayer.",
                     )
                 res = False
         elif len_perp > 1:
@@ -521,12 +454,12 @@ def mot_accepte(
                     print("Désolé mais ce mot n'existe pas. Veuillez réessayer.")
                 if not ve_emp:
                     print(
-                        "Désolé mais votre mot entre en conflit avec des lettre du plateau. Veuillez réessayer.",
+                        "Désolé mais votre mot entre en conflict avec des lettre du plateau. Veuillez réessayer.",
                     )
                 res = False
         elif len_perp == 0:
             print(
-                "Le mot créent des mots perpendiculaire qui n'existe pas. Veuillez réessayer.",
+                "Le mot créent des mots perpendicular qui n'existe pas. Veuillez réessayer.",
             )
             res = False
     else:
@@ -536,142 +469,133 @@ def mot_accepte(
     return res
 
 
-def compte_points(mots: list[str], points_lettres: dict[str, int]) -> int:
-    """Cette fonction calcule et renvoie le score associé à un ou des mots
+def compute_score(word: list[str], letter_point_mapping: dict[str, int]) -> int:
+    """Compute the total score for a list of words.
 
     Args:
-        - mot (list): une liste triée dont chaque élément d'indice i, est une chaine de caractère en majuscule
-        représentant les mots créés sur le plateau.
-        - points_lettres (dict): un dictionnaire contenant comme clés les différentes lettres de l'alphabet,
-        en majuscule; et comme valeur, les points associées à chaque lettre.
+        word: List of words formed (strings).
+        letter_point_mapping: Mapping from letter to its point value.
 
     Returns:
-        - int: points associés aux mots placés.
-
-    Examples:
-        >>> mots = ["DES"]
-        >>> points_lettres = {"D": 2, "E": 1, "S": 1}, si on ne considère que les lettres D, E et S.
-        >>> compte_points(mots, points_lettres)
-        4
-
+        int: Total points for all provided words.
     """
     points = 0
-    for i in range(len(mots)):
-        for x in range(len(mots[i])):
-            points += points_lettres[mots[i][x]]
+    for i in range(len(word)):
+        for x in range(len(word[i])):
+            points += letter_point_mapping[word[i][x]]
     return points
 
 
-def placer_mot(coup: tuple[str, tuple[int, int], str], plateau: list[list[str]]) -> str:
-    """Cette fonction modifie le plateau de sorte que les lettres du mot à placer soient insérées au bon endroit dans la
-    liste de sous-listes qui représente le plateau; cette fonction renvoie ensuite les lettres du mot à placer qui sont
-    déjà présentes sur le plateau à l'endroit exact où cette lettre devrait être placée (et qu'il ne faut donc pas
-    retirer du chevalet du joueur par la suite).
+def place_word(move: tuple[str, tuple[int, int], str], board: list[list[str]]) -> str:
+    """Place the word on the board and return letters that were already present.
+
+    This function does not remove letters from the player's rack; it only
+    returns the letters that were already on the board at the placement
+    positions so the caller can avoid removing them from the rack.
 
     Args:
-        - coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-            (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
 
     Returns:
-        - str: chaine de caractères contenant les lettres déjà présentes sur le plateau à l'emplacement du mot
-        (qu'il ne faut donc pas retirer du chevalet du joueur)
+        Concatenation of letters that were already present on the board at the placement positions.
 
-    Examples:
-        >>> plateau = [
+    Example:
+        >>> board = [
             ["_", "_", "A","R"],
             ["_", "_", "_","_"],
             ["_", "_", "_","_"],
             ["_", "_", "_","_"],
         ]
-        >>> mot = "BAR"
+        >>> word = "BAR"
         >>> position = (0,1)
         >>> direction = "H"
-        >>> coup = mot,position,direction
-        >>> lettres_presentes = placer_mot(plateau,coup)
-        >>> print(plateau)
+        >>> move = word,position,direction
+        >>> extra_letters = place_word(board,move)
+        >>> print(board)
         >>> [
             ["_", "B", "A","R"],
             ["_", "_", "_","_"],
             ["_", "_", "_","_"],
             ["_", "_", "_","_"],
         ]
-        >>> print(lettres_presentes)
+        >>> print(extra_letters)
         >>> "AR"
 
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     extra_letters = ""
     if direction == "V":
         for i in range(len(word)):
-            if plateau[line + i][column] != "_":
-                extra_letters += plateau[line + i][column]
+            if board[line + i][column] != "_":
+                extra_letters += board[line + i][column]
     elif direction == "H":
         for i in range(len(word)):
-            if plateau[line][column + i] != "_":
-                extra_letters += plateau[line][column + i]
+            if board[line][column + i] != "_":
+                extra_letters += board[line][column + i]
     return extra_letters
 
 
-def retirer_chevalet(main: str, mot: str, lettre_en_trop: str) -> str:
-    """Cette fonction retire du chevalet les lettres utile pour fabriquer le mot du joueur. elle fait donc également
-    attention à ne pas retirer du chevalets des lettres déjà présente sur le plateau. Elle renvoie ce même chevalet mis
-    à jour.
+def remove_used_letters_from_player_hand(
+    player_hand: str, word: str, extra_letters: str
+) -> str:
+    """Remove the letters used to form the played word from the player's rack.
+
+    The function takes into account letters already present on the board
+    (provided in `lettre_en_trop`) and will not remove those from the rack.
 
     Args:
-        - main (str): une chaine de caractères en majuscule représentant le chevalet du joueur.
-        - mot (str): une chaine de caractères en majuscule qui indique le mot à placer.
-        - lettre_en_trop (str): une chaine de caractères en majuscule qui indique les lettres déjà présente sur le
-        plateau, donc celle qui ne faudra pas retirer du chevalet du joueur.
+        player_hand: Player's rack string (uppercase).
+        word: Word placed.
+        lettre_en_trop: Letters already present on the board at placement
+            positions (should not be removed from the rack).
 
     Returns:
-        - main (str): une chaine de caractères en majuscule représentant le chevalet du joueur mis à jour.
+        Updated rack string after removing used letters.
 
     Examples:
-        >>>  main = "AHDBJTE"
-        >>> lettre_en_trop = "B"
-        >>> mot = "BAH"
-        >>> retirer_chevalet(main, mot, lettre_en_trop)
+        >>> player_hand = "AHDBJTE"
+        >>> extra_letters = "B"
+        >>> word = "BAH"
+        >>> remove_used_letters_from_player_hand(player_hand, word, extra_letters)
         DBJTE
 
     """
-    for i in range(len(lettre_en_trop)):
-        mot = mot.replace(lettre_en_trop[i], "", 1)
-    for x in range(len(mot)):
-        main = main.replace(mot[x], "", 1)
-    return main
+    for i in range(len(extra_letters)):
+        word = word.replace(extra_letters[i], "", 1)
+    for x in range(len(word)):
+        player_hand = player_hand.replace(word[x], "", 1)
+    return player_hand
 
 
-def mot_sur_plateau(
-    coup: tuple[str, tuple[int, int], str],
-    plateau: list[list[str]],
+def update_board_with_move(
+    move: tuple[str, tuple[int, int], str],
+    board: list[list[str]],
 ) -> list[list[str]]:
-    """Cette fonction met les lettres du mot du joueur sur le plateau et renvoie le plateau mis à jour.
+    """Update the board with the player's move and return the updated board.
 
     Args:
-        - coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-            (c) de la première lettre du mot à placer
-            - dir (str): un charactère (h ou v) qui indique la direction du mot
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
 
     Returns:
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
+        list of sublists representing each row of the game board. Each sublist contains either an underscore to indicate
+        an empty cell, or a capital letter if it has already been placed there.
 
-    Examples:
-        >>> coup = ("DES", (7,7), "H")
-        >>> plateau = [
+    Example:
+        >>> move = ("DES", (7,7), "H")
+        >>> board = [
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
@@ -688,7 +612,7 @@ def mot_sur_plateau(
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
         ]
-        >>> mot_sur_plateau(coup, plateau)
+        >>> update_board_with_move(coup, plateau)
         [
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
@@ -708,34 +632,30 @@ def mot_sur_plateau(
         ]
 
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     if direction == "H":
         for i in range(len(word)):
-            plateau[line][column + i] = word[i]
+            board[line][column + i] = word[i]
     elif direction == "V":
         for i in range(len(word)):
-            plateau[line + i][column] = word[i]
-    return plateau
+            board[line + i][column] = word[i]
+    return board
 
 
-def multijoueur() -> list[Player]:
-    """Cette fonction renvoie une list de sous-liste chacune composé en indice:
-        - 0: le nom du joueur
-        - 1: le chevalet du joueur
-        - 2: les points du joueur
-    Le nombre de sous listes correspond au nombre de joueur.
+def multiplayer() -> list[Player]:
+    """Returns a list of players for a multiplayer game.
 
     Returns:
-        - lsit_joueur (list): une list de sous-liste correspondant au nombre de joueur.
+        The list of players.
 
     Examples:
-        >>> multijoueur()
+        >>> multiplayer()
         Combien de joueur êtes vous?
         1
         Quel est le nom du joueur n° 1 ?
-        Sebastien
-        [["Sebastien", "", 0]]
+        Sébastien
+        [["Sébastien", "", 0]]
 
     """
     number_of_players = "-1"
@@ -751,16 +671,15 @@ def multijoueur() -> list[Player]:
     return list_of_players
 
 
-def display_board(plateau: list[list[str]]) -> None:
-    """Cette fonction ne sert qu'à imprimer le plateau d'une manière plus esthétique. Elle ne renvoie rien.
+def display_board(board: list[list[str]]) -> None:
+    """Display the game board in a readable format.
 
     Args:
-        - plateau (liste): une liste de sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
 
     Examples:
-        >>> plateau = [
+        >>> board = [
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
             ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
@@ -800,35 +719,33 @@ def display_board(plateau: list[list[str]]) -> None:
     print(
         "     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14",
     )
-    for x in range(len(plateau)):
+    for x in range(len(board)):
         if x > 9:
-            print(x, plateau[x], x)
+            print(x, board[x], x)
         else:
-            print(x, "", plateau[x], x)
+            print(x, "", board[x], x)
     print(
         "     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14",
     )
 
 
-def utilise_lettre_plateau(
-    coup: tuple[str, tuple[int, int], str],
-    plateau: list[list[str]],
+def use_board_letters(
+    move: tuple[str, tuple[int, int], str],
+    board: list[list[str]],
 ) -> bool:
-    """Cette fonction renvoie True si le mot à placer utilise une ou plusieurs lettres déjà présentes sur le plateau de
-    jeu. Elle renvoie False sinon.
+    """Return True if the word to place uses one or more letters already on the board.
 
     Args:
-        - coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-            (c) de la première lettre du mot à placer.
-            - dir (str): un charactère ("h" ou "v") qui indique la direction du mot.
-        - plateau (liste): une liste de 15 sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-        contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-        placée là auparavant.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
 
     Returns:
-        - bool (True / False)
+        True if at least one letter of the word to place overlaps with an existing letter on the board; False otherwise.
 
     Examples:
     >>> plateau = [
@@ -846,45 +763,43 @@ def utilise_lettre_plateau(
 
     """
     res = True
-    if len(placer_mot(coup, plateau)) == 0:
+    if len(place_word(move, board)) == 0:
         res = False
     return res
 
 
-def mots_perpendiculaires(
-    coup: tuple[str, tuple[int, int], str],
-    plateau: list[list[str]],
-    dico: set[str],
+def get_perpendicular_words(
+    move: tuple[str, tuple[int, int], str],
+    board: list[list[str]],
+    set_of_valid_words: set[str],
 ) -> list[str]:
-    """Lorsqu'un mot est placé sur le plateau de jeu, il est possible qu'il soit adjacent à des lettres déjà présentes sur
-    le plateau. De nouveaux mots perpendiculaires au mot à placer sont alors formés.
-    3 cas sont possibles:
-        - Si aucun mot perpendiculaire n'est formé, cette fonction renvoie une liste contenant un élément: le mot à
-        placer.
-        - S'il existe des mots perpendiculaires et qu'ils appartiennent TOUS au dictionnaire, cette fonction renvoie la
-        liste contenant tous les nouveaux mots formés (le mot à placer et les nouveaux mots perpendiculaires), triés
-        dans l'ordre alphabétique.
-        - S'il existe des mots perpendiculaires et qu'au moins un d'entre eux n'existe pas dans le dictionnaire, la
-        fonction renvoie une liste vide [].
+    """When placing a word on the board, it is possible that it is adjacent to letters already present on
+    the board. New words perpendicular to the word being placed are then formed.
+    3 cases are possible:
+        - If no perpendicular words are formed, this function returns a list containing one element: the word to be
+            placed.
+        - If there are perpendicular words and they ALL belong to the dictionary, this function returns the list
+            containing all the new words formed (the word to be placed and the new perpendicular words), sorted in
+            alphabetical order.
+        - If there are perpendicular words and at least one of them does not exist in the dictionary, the function
+            returns an empty list [].
 
     Args:
-        coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-                (c) de la première lettre du mot à placer.
-            - dir (str): un charactère ("h" ou "v") qui indique la direction du mot.
-        plateau (liste): une liste de 15 sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-            contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-            placée là auparavant.
-        dico (dict): une liste dont chaque élément d'indice i, est un set de mots du dictionnaire de longueur (i+1).
-            Par exemple, dico[3] pointe vers un set de tous les mots à 4 lettres.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
+        set_of_valid_words (set): set of all valid words.
 
     Returns:
-        - liste de chaine de caractères
+        list of words depending on the 3 cases described in de summary.
 
     Examples:
-        >>> coup = ('DENI', (8, 7), 'H')
-        >>> plateau = [
+        >>> move = ('DENI', (8, 7), 'H')
+        >>> board = [
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
@@ -901,21 +816,21 @@ def mots_perpendiculaires(
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
         ]
-        >>> dico = [{'A', 'K', 'C'}, {'DE', 'SI', 'RE', 'AN', 'PI'}, {'DES', 'MIS', 'SES'},
+        >>> set_of_valid_words = [{'A', 'K', 'C'}, {'DE', 'SI', 'RE', 'AN', 'PI'}, {'DES', 'SES'},
                 {'DOIS', 'CRUS', 'MAIS', 'VOIS', 'DENI'}, {'MARRE', 'BRASE', 'DOIGT', 'CRABE'}, {'PIQUEE', 'DOIGTS'}]
-        >>> mots_perpendiculaires(coup, plateau, dico)
+        >>> get_perpendicular_words(move, board, set_of_valid_words)
         []
 
     """
-    word, position, direction = coup
+    word, position, direction = move
     line, column = position
     a, b = position
     d = 0
     new_word = ""
-    liste_mots_perpendiculaire = []
-    lettre_deja_presente = localisation_lettre_sur_plateau(coup, plateau)
-    plateau_test = deepcopy(plateau)
-    plateau_test = mot_sur_plateau(coup, plateau_test)
+    liste_mots_perpendicular = []
+    lettre_deja_presente = get_existing_letter_positions(move, board)
+    plateau_test = deepcopy(board)
+    plateau_test = update_board_with_move(move, plateau_test)
     if direction == "V":
         for i in range(len(word)):
             for x in range(len(lettre_deja_presente)):
@@ -928,7 +843,7 @@ def mots_perpendiculaires(
                 new_word += plateau_test[a + i][b]
                 b += 1
             if len(new_word) > 1:
-                liste_mots_perpendiculaire.append(new_word)
+                liste_mots_perpendicular.append(new_word)
             new_word = ""
             a, b = position
             d = 0
@@ -944,42 +859,40 @@ def mots_perpendiculaires(
                 new_word += plateau_test[a][b + i]
                 a += 1
             if len(new_word) > 1:
-                liste_mots_perpendiculaire.append(new_word)
+                liste_mots_perpendicular.append(new_word)
             new_word = ""
             a, b = position
-    liste_mots_perpendiculaire.append(word)
-    if len(liste_mots_perpendiculaire) > 1:
-        for test in liste_mots_perpendiculaire:
-            if not verif_mot(test, dico):
-                liste_mots_perpendiculaire = []
-    liste_mots_perpendiculaire.sort()
-    return liste_mots_perpendiculaire
+    liste_mots_perpendicular.append(word)
+    if len(liste_mots_perpendicular) > 1:
+        for test in liste_mots_perpendicular:
+            if not verify_word(test, set_of_valid_words):
+                liste_mots_perpendicular = []
+    liste_mots_perpendicular.sort()
+    return liste_mots_perpendicular
 
 
-def localisation_lettre_sur_plateau(
-    coup: tuple[str, tuple[int, int], str],
-    plateau: list[list[str]],
+def get_existing_letter_positions(
+    move: tuple[str, tuple[int, int], str],
+    board: list[list[str]],
 ) -> list[tuple[int, int]]:
-    """Cette fonction renvoie la position des lettre déjà présente sur le plateau à l'endroit où l'on va vouloir mettre un
-    mot.
+    """Return the positions of letters already present on the board at the placement.
 
     Args:
-        coup (tuple): un tuple à 3 éléments:
-            - mot (str): une chaine de caractère en majuscule qui indique le mot à placer
-            - pos (tuple): un tuple d'entiers (l,c) qui indiquent le numéro de ligne (l), et le numéro de la colonne
-                (c) de la première lettre du mot à placer.
-            - dir (str): un charactère ("h" ou "v") qui indique la direction du mot.
-        plateau (liste): une liste de 15 sous-listes qui représentent chacune une ligne du plateau de jeu. Elles
-            contiennent chacune, soit un underscore pour indiquer que la case est vide, soit une lettre si elle a déjà été
-            placée là auparavant.
+        move: a 3-uple composed of:
+            word: capitalized string representing the word to place.
+            position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
+                of the word to place.
+            direction: a character (h or v) indicating the direction of the word.
+        board: a list of sublists representing each row of the game board. Each sublist contains either an underscore to
+            indicate an empty cell, or a letter if it has already been placed there.
 
     Returns:
-        position (list): une liste de tuple correspondant aux positions des lettres déjà présentes sur le plateau à
+        position (list): une liste de tuple correspondent aux positions des lettres déjà présentes sure le plateau à
             l'emplacement du mot qui va être placé.
 
     Examples:
-    >>> coup = ("DES", (6,7), "V")
-    >>> plateau = [
+    >>> move = ("DES", (6,7), "V")
+    >>> board = [
         ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
         ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
         ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
@@ -996,32 +909,31 @@ def localisation_lettre_sur_plateau(
         ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
         ["_","_","_","_","_","_","_","_","_","_","_","_","_","_","_"],
     ]
-    >>> localisation_lettre_sur_plateau(coup, plateau)
+    >>> get_existing_letter_positions(move, board)
     [(7,7)]
 
     """
-    mot, pos, direc = coup
-    line, column = pos
+    word, position, direction = move
+    line, column = position
     position = []
-    if direc == "V":
-        for i in range(len(mot)):
-            if plateau[line + i][column] != "_":
+    if direction == "V":
+        for i in range(len(word)):
+            if board[line + i][column] != "_":
                 position.append((line + i, column))
-    elif direc == "H":
-        for i in range(len(mot)):
-            if plateau[line][column + i] != "_":
+    elif direction == "H":
+        for i in range(len(word)):
+            if board[line][column + i] != "_":
                 position.append((line, column + i))
     return position
 
 
 def fifty_points(mot: str, lettre_en_plus: str) -> int:
-    """Cette fonction renvoie un entier valant 50 si toutes les lettre du chevalet sont utilisées en un coup. Elle renvoie
-    un entier valant 0 si ce n'est pas le cas.
+    """Return 50 if the player used all rack tiles this turn (a Scrabble), else 0.
 
     Args:
-        mot (str): chaine de caractère correspondant au mot que le joueur à placé.
-        lettre_en_plus (str): chaine de caractère correspondant au lettre déjà présente sur le plateau à l'emplacement
-        du mot que le joueur veux jouer.
+        mot: Word played.
+        lettre_en_plus: Letters already present on the board at the placement
+            positions (these do not consume rack tiles).
 
     Returns:
         points (int): entier valant 50 si toutes les lettre du chevalet sont utilisées en un coup, 0 dans le cas
@@ -1044,22 +956,26 @@ def fifty_points(mot: str, lettre_en_plus: str) -> int:
 
 
 def run() -> None:
-    """Cette fonction ne sert qu'à faire tourner tout le jeu"""
-    players = multijoueur()
+    """Run the interactive Scrabble game loop.
+
+    Orchestrates player turns, drawing tiles, prompting for moves, validating
+    and applying them, and updating scores until the bag is empty.
+    """
+    players = multiplayer()
     tour = 1
     dimensions = (15, 15)
-    plateau_de_jeu = init_board(dimensions)
+    plateau_de_jeu = initialise_board(dimensions)
     dico_occu, dico_points = load_occurrences_and_points("resources/Lettres.txt")
-    dico_mot = list_dico("resources/dico.txt")
-    pioche = init_pioche(dico_occu)
+    dico_mot = get_dictionary_set("resources/dico.txt")
+    pioche = initialise_tile_bag(dico_occu)
     while len(pioche) > 0:
         for player in players:
             display_board(plateau_de_jeu)
             pioche, player.hand = draw_hand(pioche, player.hand)
             print("C'est au tour de", player.name)
             print("Vous avez dans votre main les jetons suivants:", player.hand)
-            mot, pos, direc = propose_mot()
-            while not mot_accepte(
+            mot, pos, direc = ask_word()
+            while not check_word_accepted(
                 plateau_de_jeu,
                 player.hand,
                 (mot, pos, direc),
@@ -1067,11 +983,11 @@ def run() -> None:
                 tour,
                 dimensions,
             ):
-                mot, pos, direc = propose_mot()
-            lettre_en_plus = placer_mot((mot, pos, direc), plateau_de_jeu)
+                mot, pos, direc = ask_word()
+            lettre_en_plus = place_word((mot, pos, direc), plateau_de_jeu)
             pts_scrabble_fifty = fifty_points(mot, lettre_en_plus)
-            pts_scrabble_this_round = compte_points(
-                mots_perpendiculaires((mot, pos, direc), plateau_de_jeu, dico_mot),
+            pts_scrabble_this_round = compute_score(
+                get_perpendicular_words((mot, pos, direc), plateau_de_jeu, dico_mot),
                 dico_points,
             )
             player.score += pts_scrabble_this_round + pts_scrabble_fifty
@@ -1081,6 +997,8 @@ def run() -> None:
                 "points.",
             )
             print("Tu as au total", player.score, "points.")
-            player.hand = retirer_chevalet(player.hand, mot, lettre_en_plus)
-            plateau_de_jeu = mot_sur_plateau((mot, pos, direc), plateau_de_jeu)
+            player.hand = remove_used_letters_from_player_hand(
+                player.hand, mot, lettre_en_plus
+            )
+            plateau_de_jeu = update_board_with_move((mot, pos, direc), plateau_de_jeu)
             tour += 1
