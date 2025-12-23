@@ -1,21 +1,21 @@
 from pytest import MonkeyPatch
 
 from scrabble.main import (
+    ask_word,
     get_direction,
-    get_mot,
     get_position,
-    init_board,
-    init_pioche,
+    get_word,
+    initialise_board,
+    initialise_tile_bag,
     load_occurrences_and_points,
-    propose_mot,
-    verif_bornes,
-    verif_premier_tour,
+    verify_board_boundaries,
+    verify_first_word_centered,
 )
 
 
 def test_load_fichier_lettres() -> None:
     file_name = "resources/Lettres.txt"
-    expected_occurence = {
+    expected_occurrence = {
         "A": 9,
         "B": 2,
         "C": 2,
@@ -72,28 +72,28 @@ def test_load_fichier_lettres() -> None:
         "Z": 10,
     }
 
-    occurence, points = load_occurrences_and_points(file_name)
+    occurrence, points = load_occurrences_and_points(file_name)
 
-    assert expected_occurence == occurence
+    assert expected_occurrence == occurrence
     assert expected_points == points
 
 
 def test_pioche_init() -> None:
-    occurence_lettres = {"E": 5, "A": 7}
-    output = init_pioche(occurence_lettres)
+    occurrence_lettres = {"E": 5, "A": 7}
+    output = initialise_tile_bag(occurrence_lettres)
     expected_output = "AAAAAAAEEEEE"
     assert output == expected_output
 
 
 def test_plateau_init() -> None:
     lines, columns = 3, 4
-    plateau = init_board((lines, columns))
-    expected_plateu = [
+    plateau = initialise_board((lines, columns))
+    expected_plateau = [
         ["_", "_", "_", "_"],
         ["_", "_", "_", "_"],
         ["_", "_", "_", "_"],
     ]
-    assert expected_plateu == plateau
+    assert expected_plateau == plateau
 
 
 def test_get_position(monkeypatch: MonkeyPatch) -> None:
@@ -129,50 +129,50 @@ def test_get_mot(monkeypatch: MonkeyPatch) -> None:
     mot = "hello"
     all_inputs = ["123", "hey1", mot]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
-    assert mot.upper() == get_mot()
+    assert mot.upper() == get_word()
 
 
 def test_propose_mot(monkeypatch: MonkeyPatch) -> None:
     all_inputs = ["5", "5", "H", "hello"]
     monkeypatch.setattr("builtins.input", lambda _: all_inputs.pop(0))
     expected_output = ("HELLO", (5, 5), "H")
-    assert expected_output == propose_mot()
+    assert expected_output == ask_word()
 
 
 def test_verif_bornes_passes_horizontally() -> None:
     coup = ("BONJOUR", (7, 7), "H")
     dimension = (15, 15)
-    assert verif_bornes(coup, dimension) is True
+    assert verify_board_boundaries(coup, dimension) is True
 
 
 def test_verif_bornes_passes_vertically() -> None:
     coup = ("BONJOUR", (7, 7), "V")
     dimension = (15, 15)
-    assert verif_bornes(coup, dimension) is True
+    assert verify_board_boundaries(coup, dimension) is True
 
 
 def test_verif_bornes_fails_vertically() -> None:
     coup = ("BONJOUR", (10, 7), "V")
     dimension = (15, 15)
-    assert verif_bornes(coup, dimension) is False
+    assert verify_board_boundaries(coup, dimension) is False
 
 
 def test_verif_bornes_fails_horizontally() -> None:
     coup = ("BONJOUR", (7, 10), "H")
     dimension = (15, 15)
-    assert verif_bornes(coup, dimension) is False
+    assert verify_board_boundaries(coup, dimension) is False
 
 
 def test_verif_premier_tour_vertically() -> None:
     coup = ("BONJOUR", (7, 7), "V")
-    assert verif_premier_tour(coup) is True
+    assert verify_first_word_centered(coup) is True
 
 
 def test_verif_premier_tour_horizontally() -> None:
     coup = ("BONJOUR", (7, 7), "H")
-    assert verif_premier_tour(coup) is True
+    assert verify_first_word_centered(coup) is True
 
 
 def test_verif_premier_tour_fails() -> None:
     coup = ("BONJOUR", (5, 5), "H")
-    assert verif_premier_tour(coup) is False
+    assert verify_first_word_centered(coup) is False
