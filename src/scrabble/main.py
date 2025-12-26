@@ -5,7 +5,7 @@ from scrabble.player import Player
 
 
 def load_occurrences_and_points(
-    nom_fichier_lettres: str,
+    letter_occurrences_scores_file: str,
 ) -> tuple[dict[str, int], dict[str, int]]:
     """Open and read a letter definition file and return occurrences and points.
 
@@ -15,7 +15,7 @@ def load_occurrences_and_points(
     occurrences and letters to point values respectively.
 
     Args:
-        nom_fichier_lettres (str): Path to the letters file to open.
+        letter_occurrences_scores_file (str): Path to the letters file to open.
 
     Returns:
         occurrence_dict (dict[str, int]): Mapping from letter to its occurrence count.
@@ -29,7 +29,7 @@ def load_occurrences_and_points(
     """
     occurrence_dict: dict[str, int] = {}
     points_dict: dict[str, int] = {}
-    for line in open(nom_fichier_lettres, encoding="utf-8"):
+    for line in open(letter_occurrences_scores_file, encoding="utf-8"):
         lettre, occurrence, points = line.split()
         occurrence_dict[lettre] = int(occurrence)
         points_dict[lettre] = int(points)
@@ -37,27 +37,30 @@ def load_occurrences_and_points(
     return occurrence_dict, points_dict
 
 
-def initialise_tile_bag(letter_occurrences: dict[str, int]) -> str:
+def initialise_tile_bag(letter_occurrence_mapping: dict[str, int]) -> str:
     """Return the initial tile bag as a sorted string of letters.
 
     Builds a string containing each letter repeated according to its occurrence
     count and returns the letters sorted alphabetically.
 
     Args:
-        letter_occurrences (dict[str, int]): Mapping from letter to number of
+        letter_occurrence_mapping (dict[str, int]): Mapping from letter to number of
             occurrences to include in the initial bag.
 
     Returns:
         sorted_characters (str): String with all letters for the bag, sorted.
 
     Example:
-        >>> letter_occurrences = {'E':5, 'A':7}
-        >>> initialise_tile_bag(letter_occurrences)
+        >>> letter_occurrence_mapping = {'E':5, 'A':7}
+        >>> initialise_tile_bag(letter_occurrence_mapping)
         'AAAAAAAEEEEE'
 
     """
     sorted_characters = "".join(
-        sorted(lettre * letter_occurrences[lettre] for lettre in letter_occurrences),
+        sorted(
+            lettre * letter_occurrence_mapping[lettre]
+            for lettre in letter_occurrence_mapping
+        ),
     )
 
     return sorted_characters
@@ -80,8 +83,8 @@ def initialise_board(dimensions: tuple[int, int]) -> list[list[str]]:
         [["_", "_", "_", "_"], ["_", "_", "_", "_"], ["_", "_", "_", "_"]]
 
     """
-    number_of_lines, number_of_columns = dimensions
-    board = [["_" for _ in range(number_of_columns)] for _ in range(number_of_lines)]
+    lines, columns = dimensions
+    board = [["_" for _ in range(columns)] for _ in range(lines)]
     return board
 
 
@@ -89,7 +92,7 @@ def ask_word() -> tuple[str, tuple[int, int], str]:
     """Ask the player for where and what word they want to place.
 
     Returns:
-        mot (str): Uppercase word to place.
+        word (str): Uppercase word to place.
         position (tuple[int, int]): (row, column) index for the first letter.
         direction (str): 'H' for horizontal or 'V' for vertical.
 
@@ -102,12 +105,12 @@ def ask_word() -> tuple[str, tuple[int, int], str]:
         ('BONJOUR', (5, 6), 'H')
 
     """
-    position_ligne = get_position("ligne")
-    position_colonne = get_position("colonne")
+    line = get_position("ligne")
+    column = get_position("colonne")
     direction = get_direction()
-    mot = get_word()
-    position = (position_ligne, position_colonne)
-    return mot, position, direction
+    word = get_word()
+    position = (line, column)
+    return word, position, direction
 
 
 def get_word() -> str:
@@ -350,7 +353,7 @@ def check_word_accepted(
     move: tuple[str, tuple[int, int], str],
     set_of_valid_words: set[str],
     turn: int,
-    dimension: tuple[int, int],
+    dimensions: tuple[int, int],
 ) -> bool:
     """Return True if the proposed move is acceptable according to game rules.
 
@@ -370,7 +373,7 @@ def check_word_accepted(
             direction: a character (h or v) indicating the direction of the word.
         set_of_valid_words: Set of valid words.
         turn: Current turn number (1 means first turn).
-        dimension: Board dimensions.
+        dimensions: Board dimensions.
 
     Returns:
         bool: True if move is valid and accepted; False otherwise. Prints messages
@@ -398,13 +401,13 @@ def check_word_accepted(
         >>> player_hand = "PRDSUET"
         >>> move = ("DES", (7,7), "H")
         >>> turn = 1
-        >>> dimension = (15,15)
-        >>> check_word_accepted(board, player_hand, move, set_of_valid_words, turn, dimension)
+        >>> dimensions = (15,15)
+        >>> check_word_accepted(board, player_hand, move, set_of_valid_words, turn, dimensions)
         True
 
     """
     word, position, direction = move
-    in_bounds = verify_board_boundaries((word, position, direction), dimension)
+    in_bounds = verify_board_boundaries((word, position, direction), dimensions)
     res = True
     if in_bounds and turn == 1:
         ve_prem = verify_first_word_centered((word, position, direction))
@@ -483,12 +486,12 @@ def check_word_accepted(
     return res
 
 
-def compute_score(word: list[str], letter_point_mapping: dict[str, int]) -> int:
+def compute_score(word: list[str], letter_points_mapping: dict[str, int]) -> int:
     """Compute the total score for a list of words.
 
     Args:
         word: List of words formed (strings).
-        letter_point_mapping: Mapping from letter to its point value.
+        letter_points_mapping: Mapping from letter to its point value.
 
     Returns:
         int: Total points for all provided words.
@@ -497,7 +500,7 @@ def compute_score(word: list[str], letter_point_mapping: dict[str, int]) -> int:
     points = 0
     for i in range(len(word)):
         for x in range(len(word[i])):
-            points += letter_point_mapping[word[i][x]]
+            points += letter_points_mapping[word[i][x]]
     return points
 
 
@@ -598,7 +601,7 @@ def update_board_with_move(
     """Update the board with the player's move and return the updated board.
 
     Args:
-        move: a 3-uple composed of:
+        move: a 3-uple composed of
             word: capitalized string representing the word to place.
             position: integer tuple (l,c) which indicate the line number (l) and column number (c) of the first letter
                 of the word to place.
@@ -946,12 +949,12 @@ def get_existing_letter_positions(
     return position
 
 
-def fifty_points(mot: str, lettre_en_plus: str) -> int:
+def fifty_points(mot: str, extra_letters: str) -> int:
     """Return 50 if the player used all rack tiles this turn (a Scrabble), else 0.
 
     Args:
         mot: Word played.
-        lettre_en_plus: Letters already present on the board at the placement
+        extra_letters: Letters already present on the board at the placement
             positions (these do not consume rack tiles).
 
     Returns:
@@ -965,7 +968,7 @@ def fifty_points(mot: str, lettre_en_plus: str) -> int:
         50
 
     """
-    x = len(lettre_en_plus)
+    x = len(extra_letters)
     if len(mot) > x + 6:
         points = 50
         print("Scrabble !")
@@ -981,45 +984,49 @@ def run() -> None:
     and applying them, and updating scores until the bag is empty.
     """
     players = multiplayer()
-    tour = 1
+    turn = 1
     dimensions = (15, 15)
-    plateau_de_jeu = initialise_board(dimensions)
-    dico_occu, dico_points = load_occurrences_and_points("resources/Lettres.txt")
-    dico_mot = get_dictionary_set("resources/dico.txt")
-    pioche = initialise_tile_bag(dico_occu)
-    while len(pioche) > 0:
+    board = initialise_board(dimensions)
+    letter_occurrence_mapping, letter_points_mapping = load_occurrences_and_points(
+        "resources/Lettres.txt"
+    )
+    set_of_valid_words = get_dictionary_set("resources/dico.txt")
+    tile_bag = initialise_tile_bag(letter_occurrence_mapping)
+    while len(tile_bag) > 0:
         for player in players:
-            display_board(plateau_de_jeu)
-            pioche, player.hand = draw_hand(pioche, player.hand)
+            display_board(board)
+            tile_bag, player.hand = draw_hand(tile_bag, player.hand)
             print("C'est au tour de", player.name)
             print("Vous avez dans votre main les jetons suivants:", player.hand)
-            mot, pos, direc = ask_word()
+            word, position, direction = ask_word()
             while not check_word_accepted(
-                plateau_de_jeu,
+                board,
                 player.hand,
-                (mot, pos, direc),
-                dico_mot,
-                tour,
+                (word, position, direction),
+                set_of_valid_words,
+                turn,
                 dimensions,
             ):
-                mot, pos, direc = ask_word()
-            lettre_en_plus = place_word((mot, pos, direc), plateau_de_jeu)
-            pts_scrabble_fifty = fifty_points(mot, lettre_en_plus)
+                word, position, direction = ask_word()
+            extra_letters = place_word((word, position, direction), board)
+            potential_fifty_points = fifty_points(word, extra_letters)
             pts_scrabble_this_round = compute_score(
-                get_perpendicular_words((mot, pos, direc), plateau_de_jeu, dico_mot),
-                dico_points,
+                get_perpendicular_words(
+                    (word, position, direction), board, set_of_valid_words
+                ),
+                letter_points_mapping,
             )
-            player.score += pts_scrabble_this_round + pts_scrabble_fifty
+            player.score += pts_scrabble_this_round + potential_fifty_points
             print(
                 "Tu viens de marquer",
-                pts_scrabble_this_round + pts_scrabble_fifty,
+                pts_scrabble_this_round + potential_fifty_points,
                 "points.",
             )
             print("Tu as au total", player.score, "points.")
             player.hand = remove_used_letters_from_player_hand(
                 player.hand,
-                mot,
-                lettre_en_plus,
+                word,
+                extra_letters,
             )
-            plateau_de_jeu = update_board_with_move((mot, pos, direc), plateau_de_jeu)
-            tour += 1
+            board = update_board_with_move((word, position, direction), board)
+            turn += 1
