@@ -491,7 +491,7 @@ def compute_score(word: list[str], letter_points_mapping: dict[str, int]) -> int
 
     Args:
         word: List of words formed (strings).
-        letter_points_mapping: Mapping from letter to its point value.
+        letter_points_mapping: Mapping from letter to its points value.
 
     Returns:
         int: Total points for all provided words.
