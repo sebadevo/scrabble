@@ -36,6 +36,14 @@ repos:
         description: Lint python files using Ruff.
         args: [--fix, --exit-non-zero-on-fix]
 
+  - repo: https://github.com/facebook/pyrefly-pre-commit
+    rev: 0.46.1
+    hooks:
+      - id: pyrefly-check
+        name: Pyrefly (type checking)
+        pass_filenames: false
+        language: system
+
   - repo: https://github.com/executablebooks/mdformat
     rev: 1.0.0
     hooks:
