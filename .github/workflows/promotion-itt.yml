@@ -1,0 +1,27 @@
+name: Release Promotion Guard (itt)
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - release/itt
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  promotion:
+    if: github.event.pull_request.draft == false
+    uses: ./.github/workflows/release-promotion-guard.yaml
+    with:
+      target_branch: release/itt
+      head_sha: ${{ github.event.pull_request.head.sha }}
+      default_branch: ${{ github.event.repository.default_branch }}
