@@ -36,7 +36,7 @@ jobs:
           DEFAULT_BRANCH="${GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH}"
 
           # print statetements for sanity checks
-          echo "[DEBUG] GITHUB REPOSITORY: ${github.repository}"
+          echo "[DEBUG] GITHUB REPOSITORY: ${GITHUB_REPOSITORY}"
           echo "[DEBUG] SOURCE BRANCH: ${GITHUB_HEAD_REF}"
           echo "[DEBUG] TARGET BRANCH: ${GITHUB_BASE_REF}"
           echo "[DEBUG] PR COMMIT: ${GITHUB_SHA}"
