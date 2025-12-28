@@ -1,0 +1,70 @@
+name: Release Promotion Guard
+description: Validate that the recommended promotion flow is followed
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Validate feature promotion
+      run: |-
+        set -e
+
+        TARGET="${GITHUB_EVENT_PULL_REQUEST_BASE_REF}"
+        COMMIT="${{ github.event.pull_request.head.sha }}"
+        DEFAULT_BRANCH="${GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH}"
+
+        # print statetements for sanity checks
+        echo "[DEBUG] GITHUB REPOSITORY: ${GITHUB_REPOSITORY}"
+        echo "[DEBUG] SOURCE BRANCH: ${GITHUB_HEAD_REF}"
+        echo "[DEBUG] TARGET BRANCH: ${GITHUB_BASE_REF}"
+        echo "[DEBUG] PR COMMIT: ${GITHUB_SHA}"
+        echo "[DEBUG] HEAD COMMIT: ${COMMIT}"
+        echo "[DEBUG] DEFAULT BRANCH: ${DEFAULT_BRANCH}"
+
+        git fetch origin --prune
+
+        check_in () {
+            local commit=$1
+            local branch=$2
+            if git merge-base --is-ancestor "$commit" "origin/$branch"; then
+            echo "✅ Commit exists in $branch"
+            else
+            echo "❌ Commit does NOT exist in $branch, please first merge your branch into $branch before promoting to $TARGET"
+            exit 1
+            fi
+        }
+
+        case "$TARGET" in
+
+            release/dev)
+            echo "ℹ️ No checks for dev, you can promote directly"
+            ;;
+
+            release/itt)
+            check_in "$COMMIT" "release/dev"
+            ;;
+
+            release/uat)
+            check_in "$COMMIT" "release/itt"
+            ;;
+
+            release/prod)
+            check_in "$COMMIT" "release/uat"
+            check_in "$COMMIT" "$DEFAULT_BRANCH"
+            ;;
+
+            *)
+            echo "ℹ️ No promotion rules"
+            ;;
+        esac
+
+      env:
+        INPUTS_TARGET_BRANCH: ${{ inputs.target_branch }}
+
+        INPUTS_HEAD_SHA: ${{ inputs.head_sha }}
+
+        INPUTS_DEFAULT_BRANCH: ${{ inputs.default_branch }}
