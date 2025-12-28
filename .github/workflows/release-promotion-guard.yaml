@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   promotion-check:
-    name: "Validate Release Promotion"
+    name: "Validate promotion to ${{ github.event.pull_request.base.ref }}"
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
