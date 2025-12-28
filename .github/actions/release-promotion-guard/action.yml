@@ -10,6 +10,7 @@ runs:
         persist-credentials: false
 
     - name: Validate feature promotion
+      shell: bash
       run: |-
         set -e
 
