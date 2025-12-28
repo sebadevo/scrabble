@@ -1,3 +1,4 @@
+import random
 from collections import Counter
 
 import pytest
@@ -183,6 +184,7 @@ def test_verif_premier_tour_fails() -> None:
 
 
 def test_draw_hand() -> None:
+    random.seed(0)
     tile_bag = "AAAAABBBBBCCCCCDDDDDEEEEE"
     player_hand = "AKDH"
     new_tile_bag, new_player_hand = draw_hand(tile_bag, player_hand)
@@ -202,8 +204,6 @@ def test_draw_hand() -> None:
         assert hand_after[letter] == hand_before[letter] + drawn_tiles[letter]
 
 
-def test_draw_hand_empty_bag() -> None:
-    tile_bag = ""
-    player_hand = "AKDH"
+def test_draw_hand_empty_bag():
     with pytest.raises(ValueError):
-        draw_hand(tile_bag, player_hand)
+        draw_hand("", "ABC")
