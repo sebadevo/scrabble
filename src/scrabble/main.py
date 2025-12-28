@@ -223,11 +223,16 @@ def draw_hand(tile_bag: str, player_hand: str) -> tuple[str, str]:
     Returns:
         (tile_bag, player_hand): Updated bag string and updated player rack.
 
+    Raises:
+        ValueError: If the tile bag is empty.
+
     Example:
         >>> draw_hand("AAAAABBBBBCCCCCDDDDDEEEEE", "AKDH")
         ("AAAAABBBBBCCCDDDDDEEEE", "AKDHCEC")  # example result (random)
 
     """
+    if tile_bag == "":
+        raise ValueError("Le sac de lettres est vide. Impossible de piocher.")
     for _ in range(7 - len(player_hand)):
         x = random.randint(0, len(tile_bag) - 1)
         player_hand += tile_bag[x]
