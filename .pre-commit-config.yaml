@@ -36,11 +36,11 @@ repos:
         description: Lint python files using Ruff.
         args: [--fix, --exit-non-zero-on-fix]
 
-  - repo: https://github.com/facebook/pyrefly-pre-commit
-    rev: 0.46.1
+  - repo: local
     hooks:
-      - id: pyrefly-check
-        name: Pyrefly (type checking)
+      - id: ty check
+        name: ty (type checking)
+        entry: ty check
         pass_filenames: false
         language: system
 
@@ -62,6 +62,7 @@ repos:
     hooks:
       - id: typos
         exclude: ^resources/.*$
+
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.7.4
     hooks:
