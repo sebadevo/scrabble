@@ -4,20 +4,21 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    branches:
-      - release/dev
-      - release/itt
-      - release/uat
-      - release/prod
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      target_branch:
+        required: true
+        type: string
+      head_sha:
+        required: true
+        type: string
+      default_branch:
+        required: true
+        type: string
 
 jobs:
   promotion-check:
-    name: "Validate Release Promotion"
+    name: "Validate promotion to ${{ github.event.pull_request.base.ref }}"
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -31,12 +32,12 @@ jobs:
         run: |-
           set -e
 
-          TARGET="${GITHUB_EVENT_PULL_REQUEST_BASE_REF}"
-          COMMIT="${{ github.event.pull_request.head.sha }}"
-          DEFAULT_BRANCH="${GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH}"
+          TARGET="${INPUTS_TARGET_BRANCH}"
+          COMMIT="${INPUTS_HEAD_SHA}"
+          DEFAULT_BRANCH="${INPUTS_DEFAULT_BRANCH}"
 
           # print statetements for sanity checks
-          echo "[DEBUG] GITHUB REPOSITORY: ${github.repository}"
+          echo "[DEBUG] GITHUB REPOSITORY: ${GITHUB_REPOSITORY}"
           echo "[DEBUG] SOURCE BRANCH: ${GITHUB_HEAD_REF}"
           echo "[DEBUG] TARGET BRANCH: ${GITHUB_BASE_REF}"
           echo "[DEBUG] PR COMMIT: ${GITHUB_SHA}"
@@ -81,8 +82,8 @@ jobs:
           esac
 
         env:
-          GITHUB_EVENT_PULL_REQUEST_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          INPUTS_TARGET_BRANCH: ${{ inputs.target_branch }}
 
-          GITHUB_EVENT_PULL_REQUEST_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          INPUTS_HEAD_SHA: ${{ inputs.head_sha }}
 
-          GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          INPUTS_DEFAULT_BRANCH: ${{ inputs.default_branch }}

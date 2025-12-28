@@ -1,7 +1,12 @@
+import random
+from collections import Counter
+
+import pytest
 from pytest import MonkeyPatch
 
 from scrabble.main import (
     ask_word,
+    draw_hand,
     get_direction,
     get_position,
     get_word,
@@ -176,3 +181,29 @@ def test_verif_premier_tour_horizontally() -> None:
 def test_verif_premier_tour_fails() -> None:
     coup = ("BONJOUR", (5, 5), "H")
     assert verify_first_word_centered(coup) is False
+
+
+def test_draw_hand() -> None:
+    random.seed(0)
+    tile_bag = "AAAAABBBBBCCCCCDDDDDEEEEE"
+    player_hand = "AKDH"
+    new_tile_bag, new_player_hand = draw_hand(tile_bag, player_hand)
+    assert len(new_player_hand) == 7
+
+    bag_before = Counter(tile_bag)
+    bag_after = Counter(new_tile_bag)
+
+    hand_before = Counter(player_hand)
+    hand_after = Counter(new_player_hand)
+
+    drawn_tiles = hand_after - hand_before
+    removed_tiles = bag_before - bag_after
+
+    assert drawn_tiles == removed_tiles
+    for letter in player_hand:
+        assert hand_after[letter] == hand_before[letter] + drawn_tiles[letter]
+
+
+def test_draw_hand_empty_bag():
+    with pytest.raises(ValueError):
+        draw_hand("", "ABC")
