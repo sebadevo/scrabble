@@ -16,7 +16,7 @@ runs:
 
         TARGET="${GITHUB_BASE_REF}"
         COMMIT="${{ github.event.pull_request.head.sha }}"
-        DEFAULT_BRANCH="${GITHUB_REPOSITORY_DEFAULT_BRANCH}"
+        DEFAULT_BRANCH="${ github.event.repository.default_branch }"
 
         # print statetements for sanity checks
         echo "[DEBUG] GITHUB REPOSITORY: ${GITHUB_REPOSITORY}"
@@ -62,12 +62,3 @@ runs:
             echo "ℹ️ No promotion rules"
             ;;
         esac
-
-      env:
-        INPUTS_TARGET_BRANCH: ${{ inputs.target_branch }}
-
-        INPUTS_HEAD_SHA: ${{ inputs.head_sha }}
-
-        INPUTS_DEFAULT_BRANCH: ${{ inputs.default_branch }}
-
-        GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
