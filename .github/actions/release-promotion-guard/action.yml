@@ -14,7 +14,7 @@ runs:
       run: |-
         set -e
 
-        TARGET="${GITHUB_EVENT_PULL_REQUEST_BASE_REF}"
+        TARGET="${GITHUB_BASE_REF}"
         COMMIT="${{ github.event.pull_request.head.sha }}"
         DEFAULT_BRANCH="${GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH}"
 
