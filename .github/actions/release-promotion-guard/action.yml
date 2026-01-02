@@ -21,7 +21,7 @@ runs:
         # print statetements for sanity checks
         echo "[DEBUG] GITHUB REPOSITORY: ${GITHUB_REPOSITORY}"
         echo "[DEBUG] SOURCE BRANCH: ${GITHUB_HEAD_REF}"
-        echo "[DEBUG] TARGET BRANCH: ${GITHUB_BASE_REF}"
+        echo "[DEBUG] TARGET BRANCH: ${TARGET}"
         echo "[DEBUG] PR COMMIT: ${GITHUB_SHA}"
         echo "[DEBUG] HEAD COMMIT: ${COMMIT}"
         echo "[DEBUG] DEFAULT BRANCH: ${DEFAULT_BRANCH}"
