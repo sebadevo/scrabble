@@ -6,6 +6,11 @@ class Player:
     score: int
 
     def __init__(self, name: str) -> None:
+        """Initialize a new player.
+
+        Args:
+            name: The player's display name.
+        """
         self.name = name
         self.hand = ""
         self.score = 0

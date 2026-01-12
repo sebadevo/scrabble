@@ -1,5 +1,6 @@
-import random
+import secrets
 from copy import deepcopy
+from pathlib import Path
 
 from scrabble.player import Player
 
@@ -29,10 +30,12 @@ def load_occurrences_and_points(
     """
     occurrence_dict: dict[str, int] = {}
     points_dict: dict[str, int] = {}
-    for line in open(letter_occurrences_scores_file, encoding="utf-8"):
-        lettre, occurrence, points = line.split()
-        occurrence_dict[lettre] = int(occurrence)
-        points_dict[lettre] = int(points)
+
+    with Path(letter_occurrences_scores_file).open(encoding="utf-8") as file:
+        for line in file:
+            lettre, occurrence, points = line.split()
+            occurrence_dict[lettre] = int(occurrence)
+            points_dict[lettre] = int(points)
 
     return occurrence_dict, points_dict
 
@@ -57,10 +60,7 @@ def initialise_tile_bag(letter_occurrence_mapping: dict[str, int]) -> str:
 
     """
     sorted_characters = "".join(
-        sorted(
-            lettre * letter_occurrence_mapping[lettre]
-            for lettre in letter_occurrence_mapping
-        ),
+        sorted(lettre * letter_occurrence_mapping[lettre] for lettre in letter_occurrence_mapping),
     )
 
     return sorted_characters
@@ -151,7 +151,7 @@ def get_position(axe: str) -> int:
 
     """
     position = "-1"
-    while not position.isdigit() or not 0 <= int(position) <= 14:
+    while not position.isdigit() or not 0 <= int(position) <= 14:  # noqa: PLR2004
         position = input(f"Numéro de {axe} de la première lettre de votre mot ")
 
     return int(position)
@@ -204,8 +204,8 @@ def verify_first_word_centered(move: tuple[str, tuple[int, int], str]) -> bool:
     word, position, direction = move
     line, column = position
     word_length = len(word)
-    if (column == 7 and line <= 7 and direction == "V" and line + word_length >= 7) or (
-        line == 7 and column <= 7 and direction == "H" and column + word_length >= 7
+    if (column == 7 and line <= 7 and direction == "V" and line + word_length >= 7) or (  # noqa: PLR2004
+        line == 7 and column <= 7 and direction == "H" and column + word_length >= 7  # noqa: PLR2004
     ):
         res = True
     else:
@@ -232,9 +232,10 @@ def draw_hand(tile_bag: str, player_hand: str) -> tuple[str, str]:
 
     """
     if tile_bag == "":
-        raise ValueError("Le sac de lettres est vide. Impossible de piocher.")
+        error_message = "Le sac de lettres est vide. Impossible de piocher."
+        raise ValueError(error_message)
     for _ in range(7 - len(player_hand)):
-        x = random.randint(0, len(tile_bag) - 1)
+        x = secrets.randbelow(len(tile_bag))
         player_hand += tile_bag[x]
         tile_bag = tile_bag[:x] + tile_bag[x + 1 :]
     return tile_bag, player_hand
@@ -299,9 +300,10 @@ def get_dictionary_set(dictionary_file_name: str) -> set[str]:
 
     """
     dictionary = set()
-    for m in open(dictionary_file_name, encoding="utf-8"):
-        t = m.strip()
-        dictionary.add(t)
+    with Path(dictionary_file_name).open(encoding="utf-8") as file:
+        for line in file:
+            word = line.strip()
+            dictionary.add(word)
     return dictionary
 
 
@@ -352,7 +354,7 @@ def verify_word_placement(
     return x == len(word)
 
 
-def check_word_accepted(
+def check_word_accepted(  # noqa: C901, PLR0912, PLR0913, PLR0915
     board: list[list[str]],
     player_hand: str,
     move: tuple[str, tuple[int, int], str],
@@ -573,12 +575,12 @@ def remove_used_letters_from_player_hand(
     """Remove the letters used to form the played word from the player's rack.
 
     The function takes into account letters already present on the board
-    (provided in `lettre_en_trop`) and will not remove those from the rack.
+    (provided in `extra_letters`) and will not remove those from the rack.
 
     Args:
         player_hand: Player's rack string (uppercase).
         word: Word placed.
-        lettre_en_trop: Letters already present on the board at placement
+        extra_letters: Letters already present on the board at placement
             positions (should not be removed from the rack).
 
     Returns:
@@ -688,10 +690,7 @@ def multiplayer() -> list[Player]:
         number_of_players = input("Combien de joueur êtes vous? ")
     number_of_players_int = int(number_of_players)
 
-    list_of_players = [
-        Player(input(f"Quel est le nom du joueur n°{i + 1} ? "))
-        for i in range(number_of_players_int)
-    ]
+    list_of_players = [Player(input(f"Quel est le nom du joueur n°{i + 1} ? ")) for i in range(number_of_players_int)]
 
     return list_of_players
 
@@ -745,7 +744,7 @@ def display_board(board: list[list[str]]) -> None:
         "     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14",
     )
     for x in range(len(board)):
-        if x > 9:
+        if x > 9:  # noqa: PLR2004
             print(x, board[x], x)
         else:
             print(x, "", board[x], x)
@@ -793,7 +792,7 @@ def use_board_letters(
     return res
 
 
-def get_perpendicular_words(
+def get_perpendicular_words(  # noqa: C901, PLR0912
     move: tuple[str, tuple[int, int], str],
     board: list[list[str]],
     set_of_valid_words: set[str],
@@ -866,7 +865,7 @@ def get_perpendicular_words(
             while plateau_test[a + i][b] != "_" and b > 0 and d == 0:
                 b -= 1
             b += 1
-            while plateau_test[a + i][b] != "_" and b < 14 and d == 0:
+            while plateau_test[a + i][b] != "_" and b < 14 and d == 0:  # noqa: PLR2004
                 new_word += plateau_test[a + i][b]
                 b += 1
             if len(new_word) > 1:
@@ -882,7 +881,7 @@ def get_perpendicular_words(
             while plateau_test[a][b + i] != "_" and a > 0 and d == 0:
                 a -= 1
             a += 1
-            while plateau_test[a][b + i] != "_" and a < 14 and d == 0:
+            while plateau_test[a][b + i] != "_" and a < 14 and d == 0:  # noqa: PLR2004
                 new_word += plateau_test[a][b + i]
                 a += 1
             if len(new_word) > 1:
@@ -993,7 +992,7 @@ def run() -> None:
     dimensions = (15, 15)
     board = initialise_board(dimensions)
     letter_occurrence_mapping, letter_points_mapping = load_occurrences_and_points(
-        "resources/Lettres.txt"
+        "resources/Lettres.txt",
     )
     set_of_valid_words = get_dictionary_set("resources/dico.txt")
     tile_bag = initialise_tile_bag(letter_occurrence_mapping)
@@ -1017,7 +1016,9 @@ def run() -> None:
             potential_fifty_points = fifty_points(word, extra_letters)
             pts_scrabble_this_round = compute_score(
                 get_perpendicular_words(
-                    (word, position, direction), board, set_of_valid_words
+                    (word, position, direction),
+                    board,
+                    set_of_valid_words,
                 ),
                 letter_points_mapping,
             )
