@@ -14,7 +14,7 @@ project-excludes = ["**/*venv/**/*"]
 [dependency-groups]
 dev = [
     "prek>=0.3.3",
-    "pyrefly>=0.46.0",
+    "pyrefly>=0.53.0",
     "ruff>=0.15.2",
     "ty>=0.0.18",
     { include-group = "test" },
