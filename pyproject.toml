@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Scrabble game in python stdout in BA1 from EPB at ULB"
 readme = "README.md"
 authors = [{ name = "Sébastien De Vos", email = "sebastien.devos22@gmail.com" }]
-requires-python = "~=3.13.0"
+requires-python = ">=3.13.0"
 dependencies = []
 
 [tool.pyrefly]
@@ -13,10 +13,10 @@ project-excludes = ["**/*venv/**/*"]
 
 [dependency-groups]
 dev = [
-    "pre-commit>=4.5.1",
+    "prek>=0.3.3",
     "pyrefly>=0.46.0",
-    "ruff>=0.14.10",
-    "ty>=0.0.7",
+    "ruff>=0.15.2",
+    "ty>=0.0.18",
     { include-group = "test" },
 ]
 
@@ -34,7 +34,7 @@ line-length = 120
 # exclude = ["**/*.ipynb"] # Exclude Notebooks from linting and formatting
 
 [tool.ruff.lint]
-select = [   
+select = [
     "AIR", # Airflow
     "ERA", # eradicate
     "FAST", # FastApi
