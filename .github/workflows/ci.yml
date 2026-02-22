@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pre-commit:
-    name: "pre-commit"
+  prek:
+    name: "prek"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
