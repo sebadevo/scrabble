@@ -5,11 +5,13 @@ repos:
     rev: v0.25
     hooks:
       - id: validate-pyproject
+        priority: 0
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.10.4
     hooks:
       - id: uv-lock
+        priority: 0
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -18,11 +20,14 @@ repos:
         name: Check for large files
         description: Prevents committing files larger than 2MB.
         args: [--maxkb=2048]
+        priority: 0
       - id: name-tests-test
         name: Check test naming
         description: Ensures testt files are named correctly
         args: [--pytest-test-first]
+        priority: 0
       - id: check-merge-conflict
+        priority: 0
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.2
@@ -31,10 +36,12 @@ repos:
         name: Ruff Formatter
         description: Format python files using Ruff.
         types_or: [python]
+        priority: 0
       - id: ruff
         name: Ruff Linter
         description: Lint python files using Ruff.
         args: [--fix, --exit-non-zero-on-fix]
+        priority: 1
 
   - repo: local
     hooks:
@@ -43,6 +50,7 @@ repos:
         entry: ty check
         pass_filenames: false
         language: system
+        priority: 0
 
   - repo: https://github.com/executablebooks/mdformat
     rev: 1.0.0
@@ -51,23 +59,26 @@ repos:
         additional_dependencies:
           - mdformat-mkdocs==5.1.1
           - mdformat-footnote==0.1.2
+        priority: 0
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.47.0
     hooks:
       - id: markdownlint-fix
+        priority: 1
 
   - repo: https://github.com/crate-ci/typos
     rev: v1.43.5
     hooks:
       - id: typos
-        exclude: ^resources/.*$
+        priority: 0
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.8.1
     hooks:
       - id: prettier
         types_or: [yaml, json5]
+        priority: 0
 
   - repo: https://github.com/kynan/nbstripout
     rev: 0.9.1
@@ -76,6 +87,7 @@ repos:
         name: Jupyter Notebook Output Stripper
         description: Removes output from jupyter notebooks.
         types: [jupyter]
+        priority: 0
 
   # zizmor detects security vulnerabilities in GitHub Actions workflows.
   # Additional configuration for the tool is found in `.github/zizmor.yml`
@@ -83,11 +95,13 @@ repos:
     rev: v1.22.0
     hooks:
       - id: zizmor
+        priority: 0
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.36.2
     hooks:
       - id: check-github-workflows
+        priority: 0
 
   # `actionlint` hook, for verifying correct syntax in GitHub Actions workflows.
   # Some additional configuration for `actionlint` can be found in `.github/actionlint.yaml`.
@@ -108,3 +122,4 @@ repos:
           # and checks these with shellcheck. This is arguably its most useful feature,
           # but the integration only works if shellcheck is installed
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+        priority: 0
