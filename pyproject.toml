@@ -13,20 +13,20 @@ project-excludes = ["**/*venv/**/*"]
 
 [dependency-groups]
 dev = [
-    "prek>=0.3.3",
+    "prek>=0.3.4",
     "pyrefly>=0.53.0",
-    "ruff>=0.15.2",
-    "ty>=0.0.18",
+    "ruff>=0.15.4",
+    "ty>=0.0.19",
     { include-group = "test" },
 ]
 
 test = ["pytest>=9.0.2", "pytest-cov>=7.0.0"]
 
 [project.scripts]
-scrabble = "scrabble:main"
+scrabble = "scrabble:run"
 
 [build-system]
-requires = ["uv_build>=0.9.0,<0.10.0"]
+requires = ["uv_build>=0.10.0,<0.11.0"]
 build-backend = "uv_build"
 
 [tool.ruff]
