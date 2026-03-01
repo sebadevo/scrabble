@@ -8,7 +8,7 @@ repos:
         priority: 0
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.10.4
+    rev: 0.10.7
     hooks:
       - id: uv-lock
         priority: 0
@@ -28,9 +28,11 @@ repos:
         priority: 0
       - id: check-merge-conflict
         priority: 0
+      - id: check-toml
+        priority: 0
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.2
+    rev: v0.15.4
     hooks:
       - id: ruff-format
         name: Ruff Formatter
@@ -68,7 +70,7 @@ repos:
         priority: 1
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.43.5
+    rev: v1.44.0
     hooks:
       - id: typos
         priority: 0
@@ -98,7 +100,7 @@ repos:
         priority: 0
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.36.2
+    rev: 0.37.0
     hooks:
       - id: check-github-workflows
         priority: 0
