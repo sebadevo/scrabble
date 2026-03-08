@@ -73,6 +73,7 @@ repos:
     rev: v1.44.0
     hooks:
       - id: typos
+        exclude: ^resources/.*$
         priority: 0
 
   - repo: https://github.com/rbubley/mirrors-prettier
